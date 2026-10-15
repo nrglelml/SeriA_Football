@@ -1,8 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SeriA_Football.API.DTOs;
-using SeriA_Football.API.Entities;
 using SeriA_Football.API.Entities.Enums;
 using SerieA.API.Context;
 
@@ -50,7 +48,8 @@ namespace SeriA_Football.API.Controllers
       bool isHome = m.HomeTeamId == team.Id;
       int s = isHome ? m.HomeScore ?? 0 : m.AwayScore ?? 0;
       int c = isHome ? m.AwayScore ?? 0 : m.HomeScore ?? 0;
-      return s > c ? "G" : s == c ? "B" : "M";
+      //return s > c ? "G" : s == c ? "B" : "M"; Türkçe
+      return s > c ? "W" : s == c ? "D" : "L"; //ing
   })
   .Reverse()
   .ToList();
