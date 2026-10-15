@@ -1,0 +1,53 @@
+﻿@model StandingPageViewModel
+@using System.Globalization
+
+@{
+    int max = Model.LadderMax;
+    int step = max <= 10 ? 2 : max <= 30 ? 5 : 10;
+
+    // Aynı puanda en çok kaç takım var? İz yüksekliği buna göre büyüsün.
+    int maxStack = Model.Standings.Count == 0 ? 1 : Model.Standings.GroupBy(s => s.Points).Max(g => g.Count());
+    int trackHeight = Math.Max(116, 80 + (maxStack - 1) * 34);
+
+    int index = 0;   // animasyon gecikmesi için sıra numarası
+}
+
+<div class="ladder-scroll">
+    <div class="ladder-track" style="height:@(trackHeight)px">
+        <span class="ladder-axis" aria-hidden="true"></span>
+
+        @* Cetvel: bir kez çizilir *@
+        @for (int p = 0; p <= max; p += step)
+        {
+            <span class="ladder-tick" style="--x:@X(p, max)">@p</span>
+        }
+
+        @* Takımlar: her biri puanına göre yerleşir, aynı puandakiler üst üste dizilir *@
+        @foreach (var group in Model.Standings.GroupBy(s => s.Points))
+        {
+            int stack = 0;
+            foreach (var team in group)
+            {
+                <button type="button"
+                        class="ladder-marker @Zone(team.Rank)"
+                        style="--x:@X(team.Points, max);--stack:@stack;--i:@index"
+                        data-team-id="@team.TeamId"
+                        title="@team.TeamName · @team.Points pts"
+                        aria-label="@team.TeamName, @team.Points points">
+                    <partial name="_TeamBadge" model="team.TeamName" />
+                </button>
+                stack++;
+                index++;
+            }
+        }
+    </div>
+</div>
+
+@functions {
+    // Puanı CSS yüzdesine çevirir: 9 puan, max 10 → "90%"
+    string X(int points, int max) =>
+        (points * 100.0 / max).ToString("0.##", CultureInfo.InvariantCulture) + "%";
+
+    string Zone(int rank) =>
+        rank <= 4 ? "zone-ucl" : rank <= 6 ? "zone-europe" : rank >= 18 ? "zone-rel" : "";
+}

@@ -1,0 +1,14 @@
+﻿@model string
+@*
+    Takım arması (site.css > .team-crest).
+    Kullanım:      <partial name="_TeamBadge" model="item.TeamName" />
+    Küçük boy:     <partial name="_TeamBadge" model="item.TeamName" view-data='@(new ViewDataDictionary(ViewData) { ["Size"] = "sm" })' />
+    Büyük armalar için (maç detayı) TeamHelper.Get(...) ile doğrudan yazmak daha sade.
+*@
+@{
+    var badge = SeriA_Football.WebUI.Helpers.TeamHelper.Get(Model);
+    var size = ViewData["Size"] as string;
+}
+<span class="team-crest @(size is null ? "" : "team-crest--" + size)"
+      style="--crest-a:@badge.Primary;--crest-b:@badge.Secondary"
+      title="@Model" aria-hidden="true">@badge.Code</span>
