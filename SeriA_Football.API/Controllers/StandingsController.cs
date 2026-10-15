@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SeriA_Football.API.DTOs;
+using SeriA_Football.API.Entities;
 using SeriA_Football.API.Entities.Enums;
 using SerieA.API.Context;
 
@@ -22,7 +23,7 @@ namespace SeriA_Football.API.Controllers
             var teams = await _context.Teams.ToListAsync();
 
             var matches = await _context.Matches
-                .Where(m => m.Status==MatchStatus.Completed)
+                .Where(m => m.Status == MatchStatus.Completed)
                 .ToListAsync();
 
             var standings = teams.Select(team =>
@@ -41,6 +42,18 @@ namespace SeriA_Football.API.Controllers
                     else if (scored == conceded) drawn++;
                     else lost++;
                 }
+                var form = teamMatches
+  .OrderByDescending(m => m.MatchDate)
+  .Take(5)
+  .Select(m =>
+  {
+      bool isHome = m.HomeTeamId == team.Id;
+      int s = isHome ? m.HomeScore ?? 0 : m.AwayScore ?? 0;
+      int c = isHome ? m.AwayScore ?? 0 : m.HomeScore ?? 0;
+      return s > c ? "G" : s == c ? "B" : "M";
+  })
+  .Reverse()
+  .ToList();
                 return new StandingDto
                 {
                     TeamId = team.Id,
@@ -53,13 +66,16 @@ namespace SeriA_Football.API.Controllers
                     GoalsFor = goalsFor,
                     GoalsAgainst = goalsAgainst,
                     GoalDifference = goalsFor - goalsAgainst,
-                    Points = won * 3 + drawn
+                    Points = won * 3 + drawn,
+                    Form= form,
                 };
-                    }).OrderByDescending(s => s.Points).ThenByDescending(s => s.GoalDifference).ThenByDescending(s => s.GoalsFor).ThenBy(s => s.TeamName).ToList();
+            }).OrderByDescending(s => s.Points).ThenByDescending(s => s.GoalDifference).ThenByDescending(s => s.GoalsFor).ThenBy(s => s.TeamName).ToList();
             for (int i = 0; i < standings.Count; i++)
             {
                 standings[i].Rank = i + 1;
             }
+
+
             return Ok(standings);
         }
     }
