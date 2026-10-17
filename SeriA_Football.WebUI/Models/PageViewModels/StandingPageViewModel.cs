@@ -1,4 +1,5 @@
 ﻿using SeriA_Football.WebUI.Models;
+using System.Globalization;
 
 public class StandingPageViewModel
 {
@@ -30,4 +31,64 @@ public class StandingPageViewModel
 
     // Puan dağılımı ekseninin üst sınırı (en yüksek puanı 5'in katına yuvarlar)
     public int LadderMax => Standings.Count == 0 ? 5 : Math.Max(5, (int)Math.Ceiling(Standings.Max(s => s.Points) / 5.0) * 5);
+    public List<StatCardViewModel> StatCards
+    {
+        get
+        {
+            var cards = new List<StatCardViewModel>();
+            var inv = CultureInfo.InvariantCulture;
+
+            if (Leader != null)
+            {
+                string note = RunnerUp == null ? ""
+                    : LeaderGap > 0 ? $"{LeaderGap} pts clear of {RunnerUp.TeamName}"
+                    : $"Level on points with {RunnerUp.TeamName}";
+
+                cards.Add(new StatCardViewModel
+                {
+                    Variant = "leader",
+                    Label = "Leader",
+                    TeamName = Leader.TeamName,
+                    Note = note,
+                    Value = Leader.Points.ToString(),
+                    Unit = "pts"
+                });
+            }
+
+            if (BestAttack != null)
+                cards.Add(new StatCardViewModel
+                {
+                    Variant = "attack",
+                    Label = "Best attack",
+                    TeamName = BestAttack.TeamName,
+                    Value = BestAttack.GoalsFor.ToString(),
+                    Unit = "goals",
+                    Note = BestAttack.Played > 0 ? $"{(double)BestAttack.GoalsFor / BestAttack.Played:0.00} per match".ToString(inv) : null
+                });
+
+            if (BestDefense != null)
+                cards.Add(new StatCardViewModel
+                {
+                    Variant = "defence",
+                    Label = "Best defence",
+                    TeamName = BestDefense.TeamName,
+                    Value = BestDefense.GoalsAgainst.ToString(),
+                    Unit = "conceded",
+                    Note = BestDefense.Played > 0 ? string.Format(inv, "{0:0.00} per match", (double)BestDefense.GoalsAgainst / BestDefense.Played) : null
+                });
+
+            if (RelegationTeam != null)
+                cards.Add(new StatCardViewModel
+                {
+                    Variant = "danger",
+                    Label = "Relegation zone",
+                    TeamName = RelegationTeam.TeamName,
+                    Value = $"{RelegationTeam.Rank}.",
+                    Unit = "place",
+                    Note = $"{RelegationTeam.Points} pts, {PointsToSafety} from safety"
+                });
+
+            return cards;
+        }
+    }
 }

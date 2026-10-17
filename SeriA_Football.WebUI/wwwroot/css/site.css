@@ -1159,6 +1159,10 @@ img.team-crest {
     padding: 0;
     list-style: none;
 }
+.form-badge--empty {
+    --c: transparent;
+    border: 1.5px dashed var(--line-strong);
+}
 
 .form-badge {
     --c: var(--draw);
@@ -1188,10 +1192,12 @@ img.team-crest {
 }
 
 /* en son maç (listenin sonundaki rozet) halkayla vurgulanır */
-.form-list li:last-child .form-badge {
-    outline: 1.5px solid var(--c);
-    outline-offset: 2px;
-}
+
+    .form-list li:has(+ li .form-badge--empty) .form-badge,
+    .form-list li:last-child .form-badge:not(.form-badge--empty) {
+        outline: 1.5px solid var(--c);
+        outline-offset: 2px;
+    }
 
 /* 12. Yan panel ------------------------------------------------- */
 .side-stack {

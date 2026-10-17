@@ -17,5 +17,18 @@
         public List<string> Form { get; set; } = new();
         public int FormPoints => Form.Sum(f => f == "W" ? 3 : f == "D" ? 1 : 0);
         public int FormMaxPoints => Form.Count * 3;
+
+        public string Zone => Rank <= 4 ? "ucl" : Rank <= 6 ? "europe" : Rank >= 18 ? "rel" : "";
+
+        // Satırın CSS sınıfları: bölge rengi + bölge sınırındaki kesikli çizgi
+        public string RowCss
+        {
+            get
+            {
+                var zone = Zone == "" ? "" : "zone-" + Zone;
+                var edge = Rank == 4 ? "edge-ucl" : Rank == 6 ? "edge-europe" : Rank == 17 ? "edge-rel" : "";
+                return $"standings-row {zone} {edge}".Trim();
+            }
+        }
     }
 }
