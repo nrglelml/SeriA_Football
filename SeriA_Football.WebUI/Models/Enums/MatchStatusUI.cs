@@ -1,4 +1,4 @@
-﻿namespace SeriA_Football.API.Entities.Enums
+﻿namespace SeriA_Football.WebUI.Models.Enums
 {
     public enum MatchStatusUI
     {

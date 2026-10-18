@@ -1,0 +1,50 @@
+﻿@model FixturePageViewModel
+
+<nav class="week-nav" aria-label="Matchweek selector">
+
+    @* Önceki hafta: varsa link, yoksa pasif buton *@
+    @if (Model.HasPrevious)
+    {
+        <a class="week-arrow" asp-action="Index" asp-route-week="@Model.PreviousWeek" aria-label="Previous matchweek">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
+        </a>
+    }
+    else
+    {
+        <button type="button" class="week-arrow" disabled aria-label="Previous matchweek">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
+        </button>
+    }
+
+    <ul class="week-list">
+        @foreach (var w in Model.VisibleWeeks)
+        {
+            bool isActive = w == Model.Week;
+            <li>
+                <a class="week-btn" asp-action="Index" asp-route-week="@w"
+                   aria-pressed="@(isActive ? "true" : "false")"
+                   aria-current="@(isActive ? "page" : null)">
+                    <span class="week-btn__top">
+                        <span class="week-btn__title">Week @w</span>
+                        <span class="week-tag week-tag--active">Selected</span>
+                    </span>
+                    <span class="week-btn__range">@(isActive? Model.DateRangeText: "View fixtures")</span>
+                </a>
+            </li>
+        }
+    </ul>
+
+    @* Sonraki hafta *@
+    @if (Model.HasNext)
+    {
+        <a class="week-arrow" asp-action="Index" asp-route-week="@Model.NextWeek" aria-label="Next matchweek">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
+        </a>
+    }
+    else
+    {
+        <button type="button" class="week-arrow" disabled aria-label="Next matchweek">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
+        </button>
+    }
+</nav>

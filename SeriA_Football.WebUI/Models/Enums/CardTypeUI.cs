@@ -1,4 +1,4 @@
-﻿namespace SeriA_Football.API.Entities.Enums
+﻿namespace SeriA_Football.WebUI.Models.Enums
 {
     public enum CardTypeUI
     {
@@ -7,3 +7,10 @@
         Red = 3            // Direkt kırmızı (oyuncu oyundan atılır)
     }
 }
+
+
+
+
+
+
+

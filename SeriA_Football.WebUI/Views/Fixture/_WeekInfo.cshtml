@@ -1,0 +1,49 @@
+﻿@model FixturePageViewModel
+@{
+    string Plural(int n, string one, string many) => n == 1 ? one : many;
+
+    string doneText = Model.TotalMatches == 0
+        ? "No matches yet"
+        : Model.CompletedMatches == Model.TotalMatches
+            ? "Matchweek complete"
+            : $"{Model.CompletedMatches} / {Model.TotalMatches} completed";
+}
+
+<div>
+    <h2 class="week-info__title">Week @Model.Week</h2>
+    <p class="week-info__range">@Model.DateRangeText</p>
+</div>
+
+<ul class="week-facts">
+    <li><strong>@Model.TotalMatches</strong>@Plural(Model.TotalMatches, "match", "matches")</li>
+    <li><strong>@Model.CompletedMatches</strong>completed</li>
+    <li><strong>@Model.GoalCount</strong>@Plural(Model.GoalCount, "goal", "goals")</li>
+    @if (Model.LiveMatches > 0)
+    {
+        <li><strong>@Model.LiveMatches</strong>live</li>
+    }
+</ul>
+
+<div class="week-progress">
+    <div class="week-progress__head">
+        <span>Matchweek progress</span>
+        <strong>@doneText</strong>
+    </div>
+
+    @if (Model.TotalMatches > 0)
+    {
+        <div class="week-progress__bar" aria-hidden="true">
+            @foreach (var m in Model.Matches.OrderBy(m => m.MatchDate))
+            {
+                <span class="seg seg--@m.Status.ToCss()"
+                      title="@m.HomeTeamName - @m.AwayTeamName: @m.Status.ToDisplayName()"></span>
+            }
+        </div>
+        <div class="week-progress__legend" aria-hidden="true">
+            <span><i style="background:rgba(31,201,138,.6)"></i>Full time</span>
+            <span><i style="background:var(--green)"></i>Live</span>
+            <span><i></i>Not started</span>
+            <span><i style="background:var(--amber)"></i>Postponed</span>
+        </div>
+    }
+</div>

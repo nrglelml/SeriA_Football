@@ -1,0 +1,61 @@
+﻿@model MatchListViewModel
+@{
+    bool hasScore = Model.Status.HasScore();
+    bool linked = Model.Status is MatchStatusUI.Completed or MatchStatusUI.Live;
+    string homeCls = ""; string awayCls = "";
+    if(Model.Status == MatchStatusUI.Completed && Model.HomeScore != Model.AwayScore)
+    {
+        bool homeWon = Model.HomeScore > Model.AwayScore;
+        homeCls = homeWon ? "is-winner" : "is-loser";
+        awayCls = homeWon ? "is-loser" : "is-winner";
+    }
+}
+<li>
+    <article class="fixture-card fixture-card--@Model.Status.ToCss() @(linked ? "is-linked" : "")">
+        <div class="fx-meta">
+            <time class="fx-time" datetime="@Model.MatchDate.ToString("yyyy-MM-ddTHH:mm")">@Model.MatchDate.ToString("HH:mm")</time>
+            <span class="status status--@Model.Status.ToCss()">@Model.Status.ToDisplayName()</span>
+        </div>
+
+        <div class="fx-team fx-team--home @homeCls">
+            <span class="fx-name">@Model.HomeTeamName</span>
+            <partial name="_TeamBadge" model="Model.HomeTeamName" />
+        </div>
+
+        @if (hasScore)
+        {
+            <div class="fx-score" aria-label="Score @Model.HomeScore-@Model.AwayScore">
+                <span>@Model.HomeScore</span>
+                <span class="fx-score__sep" aria-hidden="true"></span>
+                <span>@Model.AwayScore</span>
+            </div>
+        }
+        else
+        {
+            <div class="fx-score fx-score--empty" aria-label="No score yet">-</div>
+        }
+
+        <div class="fx-team fx-team--away @awayCls">
+            <partial name="_TeamBadge" model="Model.AwayTeamName" />
+            <span class="fx-name">@Model.AwayTeamName</span>
+        </div>
+
+        <div class="fx-action">
+            @if (linked)
+            {
+                <a class="fx-link" asp-controller="Matches" asp-action="Detail" asp-route-id="@Model.Id">
+                    @(Model.Status == MatchStatusUI.Live ? "Follow live" : "Match details")
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
+                </a>
+            }
+            else if (Model.Status == MatchStatusUI.Postponed)
+            {
+                <span>New date to be announced</span>
+            }
+            else
+            {
+                <span>@Model.Stadium</span>
+            }
+        </div>
+    </article>
+</li>
