@@ -1,0 +1,38 @@
+﻿@model FixturePageViewModel
+@using System.Globalization
+@{
+    int decided = Model.HomeWinCount + Model.DrawCount + Model.AwayWinCount;
+}
+
+
+<div class="panel__head"><h2 class="panel__title" id="summary-title">Summary of @Model.Week week</h2></div>
+<dl class="summary-list">
+    <div><dt>Match</dt><dd>@Model.TotalMatches</dd></div>
+    <div><dt>Completed</dt><dd>@Model.CompletedMatches</dd></div>
+    <div><dt>Goal</dt><dd>@Model.GoalCount</dd></div>
+    <div><dt>Goals per match</dt><dd>@Model.GoalsPerMatch</dd></div>
+    <div><dt>Draws</dt><dd>@Model.DrawCount</dd></div>
+    <div><dt>Home wins</dt><dd>@Model.HomeWinCount</dd></div>
+    <div><dt>Away wins</dt><dd>@Model.AwayWinCount</dd></div>
+</dl>
+<div class="result-split">
+    <span class="result-split__title">Result split</span>
+    @if (decided > 0)
+    {
+        <div class="result-split__bar" aria-hidden="true">
+            <span class="r-home" style="flex:@Model.HomeWinCount"></span>
+            <span class="r-draw" style="flex:@Model.DrawCount"></span>
+            <span class="r-away" style="flex:@Model.AwayWinCount"></span>
+        </div>
+        <div class="result-split__legend">
+            <span><i style="background:var(--blue)"></i>Home @Model.HomeWinCount</span>
+            <span><i style="background:var(--dim)"></i>Draw @Model.DrawCount</span>
+            <span><i style="background:var(--ice)"></i>Away @Model.AwayWinCount</span>
+        </div>
+    }
+    else
+    {
+        <div class="result-split__legend"><span>No completed matches yet</span></div>
+    }
+</div>
+<p class="summary-note">Goal totals include live matches. Results only count completed matches.</p>

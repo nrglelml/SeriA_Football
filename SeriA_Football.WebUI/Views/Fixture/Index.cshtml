@@ -51,7 +51,7 @@
                     <div class="fixtures-list">
                         @if (Model.TotalMatches == 0)
                         {
-                            <p class="page-note">No fixtures have been added for this matchweek yet.</p>
+                            <p class="page-note">No fixtures have been added for this week yet.</p>
                         }
 
                         @foreach (var day in Model.MatchesByDay)
@@ -79,9 +79,13 @@
                 <aside class="col-lg-4" aria-label="Haftanın özeti ve öne çıkan maç">
                     <div class="side-stack">
                         <!-- ===== Partial: _WeeklySummary ===== -->
-                        <section class="panel" aria-labelledby="summary-title" data-weekly-summary></section>
+                        <section class="panel" aria-labelledby="summary-title" >
+                        <partial name="_WeeklySummary" model="Model" />
+                        </section>
                         <!-- ===== Partial: _FeaturedMatch ===== -->
-                        <section class="panel featured" aria-labelledby="featured-title" data-featured-match></section>
+                        <section class="panel featured" aria-labelledby="featured-title" >
+                        <partial name="_FeaturedMatch" model="Model.FeaturedMatch" />
+                        </section>
                     </div>
                 </aside>
             </div>
@@ -89,141 +93,6 @@
 
     </main>
 
-    <script>
-        
-        (function () {
-          'use strict';
-
-          
-
-       
-
-          /* ---------- Render: _FixtureCard ---------- */
-         
-
-        
-          /* ---------- Render: _WeeklySummary ---------- */
-          function renderSummary(week, s) {
-            const decided = s.homeWins + s.draws + s.awayWins;
-            const avg = s.avgGoals.toFixed(2).replace('.', ',');
-            els.summary.innerHTML = `
-              <div class="panel__head"><h2 class="panel__title" id="summary-title">${week}. Hafta özeti</h2></div>
-              <dl class="summary-list">
-                <div><dt>Maç</dt><dd>${s.total}</dd></div>
-                <div><dt>Tamamlanan</dt><dd>${s.finished}</dd></div>
-                <div><dt>Gol</dt><dd>${s.goals}</dd></div>
-                <div><dt>Maç başına gol</dt><dd>${avg}</dd></div>
-                <div><dt>Beraberlik</dt><dd>${s.draws}</dd></div>
-                <div><dt>Ev sahibi galibiyeti</dt><dd>${s.homeWins}</dd></div>
-                <div><dt>Deplasman galibiyeti</dt><dd>${s.awayWins}</dd></div>
-              </dl>
-              <div class="result-split">
-                <span class="result-split__title">Sonuç dağılımı</span>
-                ${decided ? `
-                <div class="result-split__bar" aria-hidden="true">
-                  <span class="r-home" style="flex:${s.homeWins}"></span>
-                  <span class="r-draw" style="flex:${s.draws}"></span>
-                  <span class="r-away" style="flex:${s.awayWins}"></span>
-                </div>
-                <div class="result-split__legend">
-                  <span><i style="background:var(--blue)"></i>Ev ${s.homeWins}</span>
-                  <span><i style="background:var(--dim)"></i>Beraberlik ${s.draws}</span>
-                  <span><i style="background:var(--ice)"></i>Deplasman ${s.awayWins}</span>
-                </div>` : '<div class="result-split__legend"><span>Henüz tamamlanan maç yok</span></div>'}
-              </div>
-              <p class="summary-note">Gol sayısına canlı maçlar dahildir, sonuçlar yalnızca biten maçlardan hesaplanır.</p>`;
-          }
-
-          /* ---------- Render: _FeaturedMatch ---------- */
-          function renderFeatured(week, list) {
-            const f = list.find((x) => x.id === WEEKS[week].featuredId) || list[0];
-            if (!f) { els.featured.innerHTML = ''; return; }
-            const home = TEAMS[f.home], away = TEAMS[f.away];
-            const d = toDate(f.kickoff);
-            const center = hasScore(f)
-              ? `<span class="featured__score">${f.score.home}-${f.score.away}</span>`
-              : `<span class="featured__score featured__score--vs">vs</span>`;
-            const link = (f.status === 'Finished' || f.status === 'Live')
-              ? `<a class="fx-link" href="${detailUrl(f)}">Maç detayı${chevron}</a>` : '';
-            els.featured.innerHTML = `
-              <div class="panel__head"><h2 class="panel__title" id="featured-title">Haftanın öne çıkan maçı</h2></div>
-              <div class="featured__body">
-                <div class="featured__teams">
-                  <div class="featured__team">${crest(f.home, 'team-crest--lg')}<span>${esc(home.name)}</span></div>
-                  ${center}
-                  <div class="featured__team">${crest(f.away, 'team-crest--lg')}<span>${esc(away.name)}</span></div>
-                </div>
-                <ul class="featured__info">
-                  <li>${esc(home.stadium)}</li>
-                  <li><span>${fmtWeekday.format(d)}, ${fmtDayMonth.format(d)}</span> ${fmtTime.format(d)}</li>
-                </ul>
-                <div class="featured__foot">${statusBadge(f)}${link}</div>
-              </div>`;
-          }
-
-          /* ---------- Akış ---------- */
-          const els = {
-            page: document.querySelector('[data-fixtures-page]'),
-            weekList: document.querySelector('[data-week-list]'),
-            prev: document.querySelector('[data-week-step="-1"]'),
-            next: document.querySelector('[data-week-step="1"]'),
-            info: document.querySelector('[data-week-info]'),
-            list: document.querySelector('[data-fixtures-list]'),
-            summary: document.querySelector('[data-weekly-summary]'),
-            featured: document.querySelector('[data-featured-match]')
-          };
-          let activeWeek = null;
-          let requestId = 0;
-
-          async function loadWeek(week) {
-            if (!WEEKS[week] || week === activeWeek) return;
-            activeWeek = week;
-            syncWeekSelector(week);
-            els.list.classList.add('is-loading');
-
-            const myRequest = ++requestId;
-            const list = await FixtureService.getWeek(week);
-            if (myRequest !== requestId) return;   // hızlı tıklamalarda eski yanıtı yok say
-
-            const s = computeSummary(list);
-            renderWeekInfo(week, list, s);
-            renderFixtures(list);
-            renderSummary(week, s);
-            renderFeatured(week, list);
-            els.list.classList.remove('is-loading');
-
-            try { history.replaceState(null, '', `?hafta=${week}`); } catch (e) { /* file:// */ }
-          }
-
-          /* Olaylar */
-          els.weekList.addEventListener('click', (e) => {
-            const btn = e.target.closest('[data-week]');
-            if (btn) loadWeek(Number(btn.dataset.week));
-          });
-          els.weekList.addEventListener('keydown', (e) => {
-            if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
-            const step = e.key === 'ArrowLeft' ? -1 : 1;
-            const target = activeWeek + step;
-            if (!WEEKS[target]) return;
-            loadWeek(target);
-            els.weekList.querySelector(`[data-week="${target}"]`).focus();
-          });
-          [els.prev, els.next].forEach((btn) =>
-            btn.addEventListener('click', () => loadWeek(activeWeek + Number(btn.dataset.weekStep))));
-          els.list.addEventListener('click', (e) => {
-            // kartın boş alanına tıklanınca bağlantıyı aç (ileride /Match/Detail/{id})
-            if (e.target.closest('a')) return;
-            const card = e.target.closest('.fixture-card.is-linked');
-            const link = card && card.querySelector('.fx-link');
-            if (link) link.click();
-          });
-
-          /* Başlangıç: URL'de ?hafta= varsa onu, yoksa güncel haftayı aç */
-          renderWeekSelector();
-          const fromUrl = Number(new URLSearchParams(location.search).get('hafta'));
-          loadWeek(WEEKS[fromUrl] ? fromUrl : Number(els.page.dataset.currentWeek));
-        })();
-    </script>
 
 
 

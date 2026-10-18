@@ -1,0 +1,50 @@
+﻿@model MatchListViewModel
+@{
+    var en = System.Globalization.CultureInfo.GetCultureInfo("en-GB");
+    var home = TeamHelper.Get(Model.HomeTeamName);
+    var away = TeamHelper.Get(Model.AwayTeamName);
+    bool linked = Model.Status is MatchStatusUI.Completed or MatchStatusUI.Live;
+}
+
+<div class="panel__head">
+    <h2 class="panel__title" id="featured-title">Match of the week</h2>
+</div>
+
+<div class="featured__body">
+    <div class="featured__teams">
+        <div class="featured__team">
+            <span class="team-crest team-crest--lg" style="--crest-a:@home.Primary;--crest-b:@home.Secondary" aria-hidden="true">@home.Code</span>
+            <span>@Model.HomeTeamName</span>
+        </div>
+
+        @if (Model.Status.HasScore())
+        {
+            <span class="featured__score">@Model.HomeScore-@Model.AwayScore</span>
+        }
+        else
+        {
+            <span class="featured__score featured__score--vs">vs</span>
+        }
+
+        <div class="featured__team">
+            <span class="team-crest team-crest--lg" style="--crest-a:@away.Primary;--crest-b:@away.Secondary" aria-hidden="true">@away.Code</span>
+            <span>@Model.AwayTeamName</span>
+        </div>
+    </div>
+
+    <ul class="featured__info">
+        <li>@Model.Stadium</li>
+        <li><span>@Model.MatchDate.ToString("dddd, d MMMM", en)</span> @Model.MatchDate.ToString("HH:mm")</li>
+    </ul>
+
+    <div class="featured__foot">
+        <span class="status status--@Model.Status.ToCss()">@Model.Status.ToDisplayName()</span>
+        @if (linked)
+        {
+            <a class="fx-link" asp-controller="Matches" asp-action="Detail" asp-route-id="@Model.Id">
+                Match details
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
+            </a>
+        }
+    </div>
+</div>

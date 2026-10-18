@@ -63,5 +63,13 @@ namespace SeriA_Football.WebUI.Models.PageViewModels
         public int DrawCount => Finished.Count(m => m.HomeScore == m.AwayScore);//beraberlik
         public int HomeWinCount => Finished.Count(m => m.HomeScore > m.AwayScore);//ev sahibi galibiyeti
         public int AwayWinCount => Finished.Count(m => m.HomeScore < m.AwayScore);//deplasman galibiyeti
+
+        public MatchListViewModel? FeaturedMatch =>
+     Matches.FirstOrDefault(m => m.Status == MatchStatusUI.Live)
+     ?? Finished.OrderByDescending(m => m.HomeScore + m.AwayScore)
+                .ThenBy(m => m.MatchDate)
+                .FirstOrDefault()
+     ?? Matches.OrderBy(m => m.MatchDate).FirstOrDefault();
+
     }
 }
