@@ -1,0 +1,65 @@
+﻿@model LoginViewModel
+@{
+    Layout = null;
+    var returnUrl = ViewData["ReturnUrl"] as string;
+}
+<!DOCTYPE html>
+<html lang="tr" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Yönetici Girişi · Serie A</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="auth-page">
+    <main class="auth-shell">
+        <section class="auth-card" aria-labelledby="login-title">
+            <a class="brand auth-brand" asp-area="" asp-controller="Standings" asp-action="Index">
+                <span class="league-mark">SA</span>
+                <span class="brand__text">
+                    <strong>Serie A</strong>
+                    <small>Yönetim paneli</small>
+                </span>
+            </a>
+
+            <h1 class="auth-title" id="login-title">Yönetici girişi</h1>
+            <p class="auth-sub">Maçları yönetmek için hesabınızla giriş yapın.</p>
+
+            <form asp-area="Admin" asp-controller="Account" asp-action="Login"
+                  asp-route-returnUrl="@returnUrl" method="post" class="auth-form" novalidate>
+
+                <div asp-validation-summary="ModelOnly" class="sa-alert sa-alert--error auth-alert" role="alert"></div>
+
+                <div class="sa-field">
+                    <label asp-for="Username" class="sa-field__label"></label>
+                    <input asp-for="Username" class="sa-input" autocomplete="username" autofocus />
+                    <span asp-validation-for="Username" class="field-validation-error"></span>
+                </div>
+
+                <div class="sa-field">
+                    <label asp-for="Password" class="sa-field__label"></label>
+                    <input asp-for="Password" class="sa-input" autocomplete="current-password" />
+                    <span asp-validation-for="Password" class="field-validation-error"></span>
+                </div>
+
+                <label class="auth-remember">
+                    <input asp-for="RememberMe" />
+                    <span>Beni hatırla</span>
+                </label>
+
+                <button type="submit" class="sa-btn sa-btn--primary auth-submit">Giriş yap</button>
+            </form>
+
+            <a class="auth-back" asp-area="" asp-controller="Standings" asp-action="Index">← Siteye dön</a>
+        </section>
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>

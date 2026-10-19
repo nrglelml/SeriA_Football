@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -6,6 +8,16 @@ builder.Services.AddHttpClient("SerieApi", client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"]!);
 });
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Admin/Account/Login";        // yetkisiz istek buraya yönlenir
+        options.AccessDeniedPath = "/Admin/Account/Login";
+        options.Cookie.Name = "SerieA.Admin";
+        options.Cookie.HttpOnly = true;                      // JavaScript çerezi okuyamaz
+        options.ExpireTimeSpan = TimeSpan.FromHours(8);
+        options.SlidingExpiration = true;
+    });
 
 var app = builder.Build();
 
@@ -22,7 +34,14 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthorization();
+app.UseAuthentication(); // kim olduðunu çerezden okur
+app.UseAuthorization(); //neye yetkisi olduðunu kontrol eder
+
+app.MapControllerRoute(
+      name: "areas",
+      pattern: "{area:exists}/{controller=Account}/{action=Login}/{id?}"
+    );
+
 
 app.MapControllerRoute(
     name: "default",

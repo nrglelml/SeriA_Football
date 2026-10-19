@@ -27,8 +27,6 @@ namespace SeriA_Football.API.Controllers
             var user = await _context.AdminUsers.AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Username == dto.Username);
 
-            // Kullanıcı yok ya da şifre yanlış: ikisine de AYNI cevap.
-            // Ayrı mesaj verilirse dışarıdan hangi kullanıcı adlarının var olduğu öğrenilebilir.
             if (user == null || !PasswordHelper.Verify(dto.Password, user.PasswordHash))
                 return Unauthorized("Kullanıcı adı veya şifre hatalı.");
 

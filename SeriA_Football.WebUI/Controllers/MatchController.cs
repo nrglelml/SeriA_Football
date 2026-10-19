@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SeriA_Football.WebUI.Models;
 using SeriA_Football.WebUI.Models.PageViewModels;
 using System.Net;
 
 namespace SeriA_Football.WebUI.Controllers
 {
+    [AllowAnonymous]
     public class MatchController : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;

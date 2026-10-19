@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SeriA_Football.WebUI.Models;
 using SeriA_Football.WebUI.Models.PageViewModels;
 
 namespace SeriA_Football.WebUI.Controllers
 {
+    [AllowAnonymous]
     public class FixtureController : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;
