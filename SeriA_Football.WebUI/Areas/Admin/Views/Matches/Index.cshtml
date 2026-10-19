@@ -1,8 +1,375 @@
-﻿
+﻿@model AdminMatchListViewModel
+@using System.Globalization
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Maç Yönetimi";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var inv = CultureInfo.InvariantCulture;
 }
 
-<h1>Index</h1>
+<main class="admin-content">
+    <div class="page-head">
+        <div>
+            <span class="page-eyebrow">Serie A 2026/27</span>
+            <h1 class="page-title">Maç Yönetimi</h1>
+            <p class="page-desc">Serie A karşılaşmalarını görüntüleyebilir, ekleyebilir, düzenleyebilir ve silebilirsiniz.</p>
+        </div>
+        <button type="button" class="btn-a btn-a--primary" data-open-create>
+            <svg class="icon" aria-hidden="true"><use href="#i-plus" /></svg>Yeni Maç Ekle
+        </button>
+    </div>
 
+ 
+    @if (TempData["Success"] is string ok)
+    {
+        <div class="form-alert form-alert--success is-visible" role="status">@ok</div>
+    }
+    @if (TempData["Error"] is string err)
+    {
+        <div class="form-alert is-visible" role="alert">@err</div>
+    }
+
+    <section class="card-a" aria-label="Maç listesi">
+        <form method="get" asp-action="Index" class="filter-bar" role="search">
+            <div class="filter-search">
+                <label class="field-label" for="f-team">Takım ara</label>
+                <div class="input-icon">
+                    <svg class="icon" aria-hidden="true"><use href="#i-search" /></svg>
+                    <input class="input-a" id="f-team" name="team" type="search"
+                           value="@Model.Team" placeholder="Takım adı yazın" autocomplete="off">
+                </div>
+            </div>
+
+            <div>
+                <label class="field-label" for="f-week">Hafta</label>
+                <select class="select-a" id="f-week" name="week" onchange="this.form.submit()">
+                    @for (int w = 1; w <= Model.TotalWeeks; w++)
+                    {
+                        <option value="@w" selected="@(w == Model.Week)">@(w). Hafta</option>
+                    }
+                </select>
+            </div>
+
+            <div>
+                <label class="field-label" for="f-status">Durum</label>
+                <select class="select-a" id="f-status" name="status">
+                    <option value="">Tümü</option>
+                    @foreach (var s in Enum.GetValues<MatchStatusUI>())
+                    {
+                        <option value="@s" selected="@(s == Model.Status)">@s.ToTurkish()</option>
+                    }
+                </select>
+            </div>
+
+            <div class="filter-actions">
+                <a class="btn-a btn-a--ghost" asp-action="Index" asp-route-week="@Model.Week">Temizle</a>
+                <button type="submit" class="btn-a btn-a--secondary">Filtrele</button>
+            </div>
+        </form>
+
+        @if (Model.IsFiltered)
+        {
+            <p class="filter-result">@Model.WeekMatches.Count maçtan @Model.Matches.Count tanesi gösteriliyor.</p>
+        }
+
+        @if (Model.Matches.Count == 0)
+        {
+            <div class="empty-state">
+                @if (Model.IsFiltered)
+                {
+                    <strong>Filtreye uyan maç yok</strong>
+                    <a asp-action="Index" asp-route-week="@Model.Week">Filtreleri temizle</a>
+                }
+                else
+                {
+                    <strong>Bu haftada maç yok</strong>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="table-scroll">
+                <table class="match-table">
+                    <caption class="visually-hidden">Serie A maç listesi</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col" class="col-id">ID</th>
+                            <th scope="col">Hafta</th>
+                            <th scope="col">Tarih</th>
+                            <th scope="col">Saat</th>
+                            <th scope="col">Ev Sahibi</th>
+                            <th scope="col" class="col-score">Skor</th>
+                            <th scope="col">Deplasman</th>
+                            <th scope="col">Durum</th>
+                            <th scope="col" class="col-actions">İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var match in Model.Matches)
+                        {
+                            <tr>
+                                <td class="col-id"><span>@match.Id</span></td>
+                                <td class="week-cell">@(match.Week). Hafta</td>
+                                <td>@match.MatchDate.ToString("dd.MM.yyyy", inv)</td>
+                                <td>@match.MatchDate.ToString("HH:mm", inv)</td>
+                                <td>
+                                    <div class="team-cell">
+                                        <partial name="_TeamBadge" model="match.HomeTeamName" />
+                                        <span>@match.HomeTeamName</span>
+                                    </div>
+                                </td>
+                                <td class="col-score">
+                                    @if (match.HomeScore != null && match.AwayScore != null)
+                                    {
+                                        <span class="score">@($"{match.HomeScore} - {match.AwayScore}")</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="score score--empty">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="team-cell">
+                                        <partial name="_TeamBadge" model="match.AwayTeamName" />
+                                        <span>@match.AwayTeamName</span>
+                                    </div>
+                                </td>
+                                <td><span class="badge-a badge-a--@(match.Status.ToAdminCss())">@match.Status.ToTurkish()</span></td>
+                                <td class="col-actions">
+                                    <div class="row-actions">
+                                        <button type="button" class="act-btn" title="Düzenle"
+                                                aria-label="Düzenle: @match.HomeTeamName - @match.AwayTeamName"
+                                                data-edit
+                                                data-id="@match.Id"
+                                                data-week="@match.Week"
+                                                data-home="@match.HomeTeamId"
+                                                data-away="@match.AwayTeamId"
+                                                data-date="@match.MatchDate.ToString("yyyy-MM-dd", inv)"
+                                                data-time="@match.MatchDate.ToString("HH:mm", inv)"
+                                                data-status="@((int)match.Status)"
+                                                data-home-score="@match.HomeScore"
+                                                data-away-score="@match.AwayScore">
+                                            <svg class="icon" aria-hidden="true"><use href="#i-edit" /></svg>
+                                        </button>
+                                        <button type="button" class="act-btn act-btn--danger" title="Sil"
+                                                aria-label="Sil: @match.HomeTeamName - @match.AwayTeamName"
+                                                data-delete
+                                                data-id="@match.Id"
+                                                data-name="@match.HomeTeamName - @match.AwayTeamName">
+                                            <svg class="icon" aria-hidden="true"><use href="#i-trash" /></svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        <div class="table-foot">
+            <span>@Model.Week. hafta · @Model.Matches.Count maç</span>
+            <span>Sezon 2026/27</span>
+        </div>
+    </section>
+</main>
+
+<partial name="_CreateEditMatchModal" model="Model" />
+<partial name="_DeleteMatchModal" model="Model.Week" />
+
+
+<script>
+ 
+(function () {
+    'use strict';
+
+    // 1 = Live 2= Completed 
+    const SCORE_STATUSES = ['1', '2'];
+
+    /* ===================== Ekle / Düzenle modalı ===================== */
+    const matchModal = document.getElementById('match-modal');
+
+    if (matchModal) {
+        const form = matchModal.querySelector('[data-match-form]');
+        const f = form.elements;                       // f.week, f.home, f.status ... (name'e göre)
+        const titleEl = document.getElementById('match-modal-title');
+        const alertBox = form.querySelector('[data-form-alert]');
+        const scoreBox = form.querySelector('[data-score-fields]');
+        const submitBtn = form.querySelector('[data-submit]');
+        const stadiumInput = document.getElementById('m-stadium');
+        const token = form.querySelector('input[name="__RequestVerificationToken"]').value;
+
+        /* --- yardımcılar --- */
+        function showAlert(message) {
+            alertBox.textContent = message;
+            alertBox.hidden = false;
+            alertBox.classList.add('is-visible');
+        }
+
+        function setFieldError(field, message) {
+            const wrapper = form.querySelector(`[data-field="${field}"]`);
+            wrapper.classList.add('is-invalid');
+            wrapper.querySelector('.field-error').textContent = message;
+        }
+
+        function clearErrors() {
+            alertBox.hidden = true;
+            alertBox.textContent = '';
+            alertBox.classList.remove('is-visible');
+            form.querySelectorAll('.is-invalid').forEach((el) => el.classList.remove('is-invalid'));
+            form.querySelectorAll('.field-error').forEach((el) => (el.textContent = ''));
+        }
+
+        function hasScore() {
+            return SCORE_STATUSES.includes(f.status.value);
+        }
+
+        function toggleScores() {
+            scoreBox.hidden = !hasScore();
+            if (!hasScore()) {
+                f.homeScore.value = '';
+                f.awayScore.value = '';
+            }
+        }
+
+        function fillStadium() {
+            const option = f.home.selectedOptions[0];
+            stadiumInput.value = option && option.dataset.stadium ? option.dataset.stadium : '';
+        }
+
+        /* --- açma --- */
+        function openCreate() {
+            form.reset();
+            clearErrors();
+            f.id.value = '';
+            f.week.value = form.dataset.currentWeek;   
+            titleEl.textContent = 'Yeni Maç Ekle';
+            toggleScores();
+            fillStadium();
+            matchModal.showModal();
+        }
+
+        function openEdit(button) {
+            const d = button.dataset;                
+            form.reset();
+            clearErrors();
+            f.id.value = d.id;
+            f.week.value = d.week;
+            f.status.value = d.status;
+            f.home.value = d.home;
+            f.away.value = d.away;
+            f.date.value = d.date;
+            f.time.value = d.time;
+            toggleScores();
+            f.homeScore.value = d.homeScore ?? '';
+            f.awayScore.value = d.awayScore ?? '';
+            titleEl.textContent = 'Maçı Düzenle';
+            fillStadium();
+            matchModal.showModal();
+        }
+
+
+        function validate() {
+            let ok = true;
+            const fail = (field, msg) => { setFieldError(field, msg); ok = false; };
+
+            if (!f.week.value) fail('week', 'Hafta seçin.');
+            if (!f.home.value) fail('home', 'Ev sahibi takımı seçin.');
+            if (!f.away.value) fail('away', 'Deplasman takımını seçin.');
+            if (f.home.value && f.home.value === f.away.value) fail('away', 'Bir takım kendisiyle oynayamaz.');
+            if (!f.date.value) fail('date', 'Tarih seçin.');
+            if (!f.time.value) fail('time', 'Saat seçin.');
+
+            if (hasScore()) {
+                ['homeScore', 'awayScore'].forEach((name) => {
+                    const value = f[name].value;
+                    if (value === '') fail(name, 'Skor girin.');
+                    else if (!Number.isInteger(+value) || +value < 0 || +value > 20) fail(name, '0 ile 20 arasında bir sayı girin.');
+                });
+            }
+            return ok;
+        }
+
+        /* --- kaydet --- */
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            clearErrors();
+
+            if (!validate()) {
+                showAlert('Lütfen işaretli alanları kontrol edin.');
+                return;
+            }
+
+
+            const payload = {
+                week: +f.week.value,
+                homeTeamId: +f.home.value,
+                awayTeamId: +f.away.value,
+                matchDate: `${f.date.value}T${f.time.value}`,
+                status: +f.status.value,
+                homeScore: hasScore() ? +f.homeScore.value : null,
+                awayScore: hasScore() ? +f.awayScore.value : null
+            };
+
+            const id = f.id.value;
+            const url = id ? `${form.dataset.editUrl}/${id}` : form.dataset.createUrl;
+
+            submitBtn.disabled = true;
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+
+                    window.location.href = `${form.dataset.indexUrl}?week=${payload.week}`;
+                    return;
+                }
+
+                const data = await response.json().catch(() => null);
+                showAlert(data && data.message ? data.message : 'Kayıt sırasında bir hata oluştu.');
+            } catch {
+                showAlert('Sunucuya ulaşılamadı.');
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+
+        f.status.addEventListener('change', toggleScores);
+        f.home.addEventListener('change', fillStadium);
+
+        document.querySelectorAll('[data-open-create]').forEach((btn) => btn.addEventListener('click', openCreate));
+        document.querySelectorAll('[data-edit]').forEach((btn) => btn.addEventListener('click', () => openEdit(btn)));
+    }
+
+    /* ===================== Silme modalı ===================== */
+    const deleteModal = document.getElementById('delete-modal');
+
+    if (deleteModal) {
+        const idInput = deleteModal.querySelector('[data-delete-id]');
+        const text = deleteModal.querySelector('[data-delete-text]');
+
+        document.querySelectorAll('[data-delete]').forEach((btn) =>
+            btn.addEventListener('click', () => {
+                idInput.value = btn.dataset.id;
+                text.textContent = `${btn.dataset.name} maçı silinecek. Bu işlem geri alınamaz.`;
+                deleteModal.showModal();
+            }));
+    }
+
+    /* ===================== Ortak: kapatma ===================== */
+    document.querySelectorAll('dialog').forEach((dialog) => {
+        dialog.querySelectorAll('[data-modal-close]').forEach((btn) =>
+            btn.addEventListener('click', () => dialog.close()));
+
+        // Koyu arka plana tıklayınca kapat
+        dialog.addEventListener('click', (event) => {
+            if (event.target === dialog) dialog.close();
+        });
+    });
+})();
+</script>

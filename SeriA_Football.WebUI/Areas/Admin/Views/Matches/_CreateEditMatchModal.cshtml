@@ -1,0 +1,112 @@
+﻿@model AdminMatchListViewModel
+@*
+    Ekleme + düzenleme için TEK modal.
+    script ayarlıyor
+*@
+<dialog class="modal-a" id="match-modal" aria-labelledby="match-modal-title">
+    <form data-match-form novalidate
+          data-create-url="@Url.Action("Create", "Matches", new { area = "Admin" })"
+          data-edit-url="@Url.Action("Edit", "Matches", new { area = "Admin" })"
+          data-index-url="@Url.Action("Index", "Matches", new { area = "Admin" })"
+          data-current-week="@Model.Week">
+
+        @Html.AntiForgeryToken()
+
+        <div class="modal-head">
+            <h2 class="modal-title" id="match-modal-title">Yeni Maç Ekle</h2>
+            <button type="button" class="icon-btn" data-modal-close aria-label="Kapat">
+                <svg class="icon" aria-hidden="true"><use href="#i-x" /></svg>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <div class="form-alert" data-form-alert role="alert" hidden></div>
+            <input type="hidden" name="id">
+
+            <div class="form-grid">
+                <div class="form-field" data-field="week">
+                    <label class="field-label" for="m-week">Hafta <span class="req">*</span></label>
+                    <select class="select-a" id="m-week" name="week" aria-describedby="m-week-err">
+                        <option value="">Hafta seçin</option>
+                        @for (int w = 1; w <= Model.TotalWeeks; w++)
+                        {
+                            <option value="@w">@w. Hafta</option>
+                        }
+                    </select>
+                    <p class="field-error" id="m-week-err"></p>
+                </div>
+
+                <div class="form-field" data-field="status">
+                    <label class="field-label" for="m-status">Maç Durumu</label>
+                    <select class="select-a" id="m-status" name="status">
+                        @foreach (var s in Enum.GetValues<MatchStatusUI>())
+                        {
+                            <option value="@((int)s)">@s.ToTurkish()</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-field" data-field="home">
+                    <label class="field-label" for="m-home">Ev Sahibi Takım <span class="req">*</span></label>
+                    <select class="select-a" id="m-home" name="home" aria-describedby="m-home-err">
+                        <option value="">Takım seçin</option>
+                        @foreach (var t in Model.Teams)
+                        {
+                            <option value="@t.Id" data-stadium="@t.Stadium">@t.Name</option>
+                        }
+                    </select>
+                    <p class="field-error" id="m-home-err"></p>
+                </div>
+
+                <div class="form-field" data-field="away">
+                    <label class="field-label" for="m-away">Deplasman Takımı <span class="req">*</span></label>
+                    <select class="select-a" id="m-away" name="away" aria-describedby="m-away-err">
+                        <option value="">Takım seçin</option>
+                        @foreach (var t in Model.Teams)
+                        {
+                            <option value="@t.Id">@t.Name</option>
+                        }
+                    </select>
+                    <p class="field-error" id="m-away-err"></p>
+                </div>
+
+                <div class="form-field" data-field="date">
+                    <label class="field-label" for="m-date">Maç Tarihi <span class="req">*</span></label>
+                    <input class="input-a" id="m-date" name="date" type="date" aria-describedby="m-date-err">
+                    <p class="field-error" id="m-date-err"></p>
+                </div>
+
+                <div class="form-field" data-field="time">
+                    <label class="field-label" for="m-time">Maç Saati <span class="req">*</span></label>
+                    <input class="input-a" id="m-time" name="time" type="time" aria-describedby="m-time-err">
+                    <p class="field-error" id="m-time-err"></p>
+                </div>
+
+                <div class="form-field span-2" data-field="stadium">
+                    <label class="field-label" for="m-stadium">Stadyum</label>
+                    <input class="input-a" id="m-stadium" type="text" readonly placeholder="Ev sahibi seçilince otomatik dolar">
+                </div>
+
+                <div class="score-fields span-2" data-score-fields hidden>
+                    <div class="form-field" data-field="homeScore">
+                        <label class="field-label" for="m-hs">Ev sahibi skoru <span class="req">*</span></label>
+                        <input class="input-a" id="m-hs" name="homeScore" type="number" min="0" max="20" inputmode="numeric" aria-describedby="m-hs-err">
+                        <p class="field-error" id="m-hs-err"></p>
+                    </div>
+                    <div class="form-field" data-field="awayScore">
+                        <label class="field-label" for="m-as">Deplasman skoru <span class="req">*</span></label>
+                        <input class="input-a" id="m-as" name="awayScore" type="number" min="0" max="20" inputmode="numeric" aria-describedby="m-as-err">
+                        <p class="field-error" id="m-as-err"></p>
+                    </div>
+                </div>
+            </div>
+
+            <p class="field-hint" style="margin:14px 0 12px">Oynanıyor veya Tamamlandı seçildiğinde skor alanları açılır.</p>
+        </div>
+
+        <div class="modal-foot">
+            <button type="button" class="btn-a btn-a--secondary" data-modal-close>Vazgeç</button>
+            <button type="submit" class="btn-a btn-a--primary" data-submit>Kaydet</button>
+        </div>
+    </form>
+</dialog>

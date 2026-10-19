@@ -39,7 +39,7 @@ app.UseAuthorization(); //neye yetkisi olduðunu kontrol eder
 
 app.MapControllerRoute(
       name: "areas",
-      pattern: "{area:exists}/{controller=Account}/{action=Login}/{id?}"
+      pattern: "{area:exists}/{controller=Matches}/{action=Index}/{id?}"
     );
 
 
