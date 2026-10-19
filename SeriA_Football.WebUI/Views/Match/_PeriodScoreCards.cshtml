@@ -1,0 +1,59 @@
+﻿@model MatchDetailPageViewModel
+@{
+    var match = Model.Match;
+
+}
+<div class="period-cards">
+    <article class="period-card">
+        <p class="period-card__label">First Half</p>
+        <p class="period-card__score">@Model.HalfTimeHome-@Model.HalfTimeAway</p>
+
+        @if (Model.HalfTimeHome > Model.HalfTimeAway)
+        {
+            <p class="period-card__note">@match.HomeTeamName ahead</p>
+        }
+        else if (Model.HalfTimeHome == Model.HalfTimeAway)
+        {
+            <p class="period-card__note">Draw</p>
+        }
+        else
+        {
+            <p class="period-card__note">@match.AwayTeamName ahead</p>
+        }
+
+    </article>
+    <article class="period-card">
+        <p class="period-card__label">Second Half</p>
+        <p class="period-card__score">@Model.SecondHalfHome-@Model.SecondHalfAway</p>
+
+        @if (Model.SecondHalfHome > Model.SecondHalfAway)
+        {
+            <p class="period-card__note">@match.HomeTeamName ahead</p>
+        }
+        else if (Model.SecondHalfHome == Model.SecondHalfAway)
+        {
+            <p class="period-card__note">Draw</p>
+        }
+        else
+        {
+            <p class="period-card__note">@match.AwayTeamName ahead</p>
+        }
+    </article>
+    <article class="period-card period-card--final">
+        <p class="period-card__label">Result</p>
+        <p class="period-card__score">@match.HomeScore - @match.AwayScore</p>
+        @if (match.HomeScore > match.AwayScore)
+        {
+            <p class="period-card__note">@match.HomeTeamName won</p>
+        }
+        else if (match.HomeScore == match.AwayScore)
+        {
+            <p class="period-card__note">Draw</p>
+        }
+        else
+        {
+            <p class="period-card__note">@match.AwayTeamName won</p>
+        }
+
+    </article>
+</div>

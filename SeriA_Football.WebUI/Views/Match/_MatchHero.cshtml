@@ -1,0 +1,153 @@
+﻿@model MatchDetailPageViewModel
+@{
+    var en = System.Globalization.CultureInfo.GetCultureInfo("en-GB");
+    var match = Model.Match;
+    var events = Model.Events;
+    var homeBadge = TeamHelper.Get(match.HomeTeamName);
+    var awayBadge = TeamHelper.Get(match.AwayTeamName);
+
+    bool finished = match.Status == MatchStatusUI.Completed;
+    bool hasScore = match.Status.HasScore();
+
+    // Kazanan/kaybeden
+    string homeCls = "", awayCls = "";
+    if (finished && match.HomeScore != match.AwayScore)
+    {
+        bool homeWon = match.HomeScore > match.AwayScore;
+        homeCls = homeWon ? "is-winner" : "is-loser";
+        awayCls = homeWon ? "is-loser" : "is-winner";
+    }
+
+    // İlk yarı skoru sadece gol kayıtları skorla tutarlıysa anlamlı
+    bool goalsMatchScore = match.Goals.Count == (match.HomeScore ?? 0) + (match.AwayScore ?? 0);
+}
+
+<div class="hero-topbar">
+    <ul class="comp-tags" aria-label="Competition">
+        <li class="comp-tag comp-tag--league">Serie A</li>
+        <li class="comp-tag">2026/27</li>
+        <li class="comp-tag">Week @match.Week</li>
+    </ul>
+    <span class="status-pill status-pill--@match.Status.ToString().ToLower()">@match.Status.ToDisplayName()</span>
+</div>
+
+<div class="scoreboard">
+    <div class="sb-team sb-team--home @homeCls">
+        <span class="team-crest team-crest--xl"
+              style="--crest-a:@homeBadge.Primary;--crest-b:@homeBadge.Secondary"
+              aria-hidden="true">@homeBadge.Code</span>
+        <div>
+            <span class="sb-team__role">Home</span>
+            <h1 class="sb-team__name">@match.HomeTeamName</h1>
+            @if (Model.HomeScorers.Count > 0)
+            {
+                <ul class="sb-scorers" aria-label="@match.HomeTeamName goals">
+                    @foreach (var goal in Model.HomeScorers)
+                    {
+                        <li><svg class="i-ball" aria-hidden="true"><use href="#i-ball" /></svg>@goal.PlayerName @(goal.Minute)'</li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+
+    <div class="sb-score">
+        @if (hasScore)
+        {
+            <p class="sb-score__value" aria-label="Score @match.HomeScore-@match.AwayScore">
+                <span class="@homeCls">@match.HomeScore</span><span class="sb-score__sep" aria-hidden="true"></span><span class="@awayCls">@match.AwayScore</span>
+            </p>
+            @if (goalsMatchScore)
+            {
+                <p class="sb-score__ht">Half-time @Model.HalfTimeHome - @Model.HalfTimeAway</p>
+            }
+            else
+            {
+                <p class="sb-score__ht">Goal details not recorded</p>
+            }
+        }
+        else
+        {
+            <p class="sb-score__value" aria-label="Not played yet">
+                <span>vs</span>
+            </p>
+            <p class="sb-score__ht">Kick-off @match.MatchDate.ToString("HH:mm")</p>
+        }
+    </div>
+
+    <div class="sb-team sb-team--away @awayCls">
+        <span class="team-crest team-crest--xl"
+              style="--crest-a:@awayBadge.Primary;--crest-b:@awayBadge.Secondary"
+              aria-hidden="true">@awayBadge.Code</span>
+        <div>
+            <span class="sb-team__role">Away</span>
+            <h2 class="sb-team__name">@match.AwayTeamName</h2>
+            @if (Model.AwayScorers.Count > 0)
+            {
+                <ul class="sb-scorers" aria-label="@match.AwayTeamName goals">
+                    @foreach (var goal in Model.AwayScorers)
+                    {
+                        <li><svg class="i-ball" aria-hidden="true"><use href="#i-ball" /></svg>@goal.PlayerName @(goal.Minute)'</li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+</div>
+
+<ul class="hero-facts">
+    <li><svg aria-hidden="true"><use href="#i-calendar" /></svg>@match.MatchDate.ToString("dddd, d MMMM yyyy", en)</li>
+    <li><svg aria-hidden="true"><use href="#i-clock" /></svg>@match.MatchDate.ToString("HH:mm")</li>
+    <li><svg aria-hidden="true"><use href="#i-stadium" /></svg>@match.Stadium</li>
+</ul>
+
+<section class="flow-strip" aria-labelledby="flow-title">
+    <div class="flow-head">
+        <h2 class="flow-title" id="flow-title">Match flow</h2>
+        @if (events.Count > 0)
+        {
+            <p class="flow-hint">Tap an event for details</p>
+        }
+    </div>
+    <div class="flow-scroll">
+        <div class="flow-track">
+            <span class="flow-side-label flow-side-label--home">
+                <span class="team-crest team-crest--xs" style="--crest-a:@homeBadge.Primary;--crest-b:@homeBadge.Secondary" aria-hidden="true"></span>
+            </span>
+            <span class="flow-side-label flow-side-label--away">
+                <span class="team-crest team-crest--xs" style="--crest-a:@awayBadge.Primary;--crest-b:@awayBadge.Secondary" aria-hidden="true"></span>
+            </span>
+
+            <span class="flow-axis" aria-hidden="true"></span>
+            <span class="flow-half" aria-hidden="true"><span>Half-time</span></span>
+            <span class="flow-tick" style="--x:calc(15 / 95 * 100%)">15'</span>
+            <span class="flow-tick" style="--x:calc(30 / 95 * 100%)">30'</span>
+            <span class="flow-tick" style="--x:calc(45 / 95 * 100%)">45'</span>
+            <span class="flow-tick" style="--x:calc(60 / 95 * 100%)">60'</span>
+            <span class="flow-tick" style="--x:calc(75 / 95 * 100%)">75'</span>
+            <span class="flow-tick" style="--x:calc(90 / 95 * 100%)">90'</span>
+
+            @foreach (var e in events)
+            {
+                var team = e.IsHome ? match.HomeTeamName : match.AwayTeamName;
+                var who = e.Type == MatchEventType.Substitution
+                ? $"{e.PlayerName} on, {e.PlayerOut} off"
+                : e.PlayerName;
+
+                <button type="button"
+                        class="flow-marker flow-marker--@(e.IsHome ? "home" : "away") flow-marker--@e.TypeCss"
+                        style="--m:@e.Minute"
+                        data-flow-ref="@e.Key"
+                        aria-label="@(e.Minute)', @team @e.Label.ToLower(), @who"
+                        title="@(e.Minute)' @e.Label: @who">
+                    <span class="flow-marker__dot">
+                        @if (e.Type == MatchEventType.Goal)
+                        {
+                            <svg class="i-ball" aria-hidden="true"><use href="#i-ball" /></svg>
+                        }
+                    </span>
+                </button>
+            }
+        </div>
+    </div>
+</section>

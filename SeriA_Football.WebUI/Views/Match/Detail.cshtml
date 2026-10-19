@@ -2,6 +2,20 @@
 @{
     ViewData["Title"] = "Match Detail";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var en = System.Globalization.CultureInfo.GetCultureInfo("en-GB");
+    var match = Model.Match;
+    var homeBadge = TeamHelper.Get(match.HomeTeamName);
+    var awayBadge = TeamHelper.Get(match.AwayTeamName);
+
+    int hId = match.HomeTeamId, aId = match.AwayTeamId;
+    var rows = new[]
+    {
+        (Label: "Goals",         Home: match.Goals.Count(g => g.TeamId == hId), Away: match.Goals.Count(g => g.TeamId == aId)),
+        (Label: "Yellow cards",  Home: Model.YellowCards(hId),                  Away: Model.YellowCards(aId)),
+        (Label: "Red cards",     Home: Model.RedCards(hId),                     Away: Model.RedCards(aId)),
+        (Label: "Substitutions", Home: Model.Subs(hId),                         Away: Model.Subs(aId)),
+    };
 }
 
 
@@ -20,90 +34,7 @@
 
         <!-- ===== Partial: _MatchHero ===== -->
         <header class="match-hero">
-            <div class="hero-topbar">
-                <ul class="comp-tags" aria-label="Müsabaka">
-                    <li class="comp-tag comp-tag--league">Serie A</li>
-                    <li class="comp-tag">2026/27</li>
-                    <li class="comp-tag">Hafta 12</li>
-                </ul>
-                <span class="status-pill">Maç bitti</span>
-            </div>
-
-            <div class="scoreboard">
-                <div class="sb-team sb-team--home">
-                    <span class="team-crest team-crest--xl crest-milan" aria-hidden="true">MIL</span>
-                    <div>
-                        <span class="sb-team__role">Ev sahibi</span>
-                        <h1 class="sb-team__name">Milan</h1>
-                        <ul class="sb-scorers" aria-label="Milan golleri">
-                            <li><svg class="i-ball" aria-hidden="true"><use href="#i-ball" /></svg>Rafael Leão 14'</li>
-                            <li><svg class="i-ball" aria-hidden="true"><use href="#i-ball" /></svg>Olivier Giroud 41'</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="sb-score">
-                    <p class="sb-score__value" aria-label="Skor: Milan 2, Roma 1">
-                        <span>2</span><span class="sb-score__sep" aria-hidden="true"></span><span class="is-loser">1</span>
-                    </p>
-                    <p class="sb-score__ht">İlk yarı 2-0</p>
-                </div>
-
-                <div class="sb-team sb-team--away is-loser">
-                    <span class="team-crest team-crest--xl crest-roma" aria-hidden="true">ROM</span>
-                    <div>
-                        <span class="sb-team__role">Deplasman</span>
-                        <h2 class="sb-team__name">Roma</h2>
-                        <ul class="sb-scorers" aria-label="Roma golleri">
-                            <li><svg class="i-ball" aria-hidden="true"><use href="#i-ball" /></svg>Tammy Abraham 72'</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <ul class="hero-facts">
-                <li><svg aria-hidden="true"><use href="#i-calendar" /></svg>18 Kasım 2026</li>
-                <li><svg aria-hidden="true"><use href="#i-clock" /></svg>22:45</li>
-                <li><svg aria-hidden="true"><use href="#i-stadium" /></svg>San Siro</li>
-                <li><svg aria-hidden="true"><use href="#i-whistle" /></svg><span>Hakem:</span> Daniele Orsato</li>
-            </ul>
-
-            <!-- Partial: _MatchFlowStrip -->
-            <section class="flow-strip" aria-labelledby="flow-title">
-                <div class="flow-head">
-                    <h2 class="flow-title" id="flow-title">Maç akışı</h2>
-                    <p class="flow-hint">Ayrıntısını görmek için bir olaya dokun</p>
-                </div>
-                <div class="flow-scroll">
-                    <div class="flow-track">
-                        <span class="flow-side-label flow-side-label--home"><span class="team-crest team-crest--xs crest-milan" aria-hidden="true">MIL</span></span>
-                        <span class="flow-side-label flow-side-label--away"><span class="team-crest team-crest--xs crest-roma" aria-hidden="true">ROM</span></span>
-                        <span class="flow-axis" aria-hidden="true"></span>
-                        <span class="flow-half" aria-hidden="true"><span>Devre arası</span></span>
-                        <span class="flow-tick" style="--x:calc(15 / 95 * 100%)">15'</span>
-                        <span class="flow-tick" style="--x:calc(30 / 95 * 100%)">30'</span>
-                        <span class="flow-tick" style="--x:calc(45 / 95 * 100%)">45'</span>
-                        <span class="flow-tick" style="--x:calc(60 / 95 * 100%)">60'</span>
-                        <span class="flow-tick" style="--x:calc(75 / 95 * 100%)">75'</span>
-                        <span class="flow-tick" style="--x:calc(90 / 95 * 100%)">90'</span>
-
-                        <button type="button" class="flow-marker flow-marker--home flow-marker--goal" style="--m:14" data-flow-ref="ev-14" aria-label="14. dakika, Milan golü, Rafael Leão" title="14' Gol: Rafael Leão"><span class="flow-marker__dot"><svg class="i-ball" aria-hidden="true"><use href="#i-ball" /></svg></span></button>
-                        <button type="button" class="flow-marker flow-marker--away flow-marker--card" style="--m:27" data-flow-ref="ev-27" aria-label="27. dakika, sarı kart, Paulo Dybala" title="27' Sarı kart: Paulo Dybala"><span class="flow-marker__dot"><span class="i-card i-card--yellow"></span></span></button>
-                        <button type="button" class="flow-marker flow-marker--home flow-marker--goal" style="--m:41" data-flow-ref="ev-41" aria-label="41. dakika, Milan golü, Olivier Giroud" title="41' Gol: Olivier Giroud"><span class="flow-marker__dot"><svg class="i-ball" aria-hidden="true"><use href="#i-ball" /></svg></span></button>
-                        <button type="button" class="flow-marker flow-marker--away flow-marker--card" style="--m:54" data-flow-ref="ev-54" aria-label="54. dakika, sarı kart, Bryan Cristante" title="54' Sarı kart: Bryan Cristante"><span class="flow-marker__dot"><span class="i-card i-card--yellow"></span></span></button>
-                        <button type="button" class="flow-marker flow-marker--away flow-marker--sub" style="--m:58" data-flow-ref="ev-58" aria-label="58. dakika, Roma oyuncu değişikliği" title="58' Değişiklik: Pellegrini girdi"><span class="flow-marker__dot"></span></button>
-                        <button type="button" class="flow-marker flow-marker--home flow-marker--sub" style="--m:64" data-flow-ref="ev-64" aria-label="64. dakika, Milan oyuncu değişikliği" title="64' Değişiklik: Pulisic girdi"><span class="flow-marker__dot"></span></button>
-                        <button type="button" class="flow-marker flow-marker--home flow-marker--card" style="--m:67" data-flow-ref="ev-67" aria-label="67. dakika, sarı kart, Fikayo Tomori" title="67' Sarı kart: Fikayo Tomori"><span class="flow-marker__dot"><span class="i-card i-card--yellow"></span></span></button>
-                        <button type="button" class="flow-marker flow-marker--away flow-marker--goal" style="--m:72" data-flow-ref="ev-72" aria-label="72. dakika, Roma golü, Tammy Abraham" title="72' Gol: Tammy Abraham"><span class="flow-marker__dot"><svg class="i-ball" aria-hidden="true"><use href="#i-ball" /></svg></span></button>
-                        <button type="button" class="flow-marker flow-marker--away flow-marker--card" style="--m:74;margin-left:7px" data-flow-ref="ev-74" aria-label="74. dakika, sarı kart, Gianluca Mancini" title="74' Sarı kart: Gianluca Mancini"><span class="flow-marker__dot"><span class="i-card i-card--yellow"></span></span></button>
-                        <button type="button" class="flow-marker flow-marker--home flow-marker--sub" style="--m:78" data-flow-ref="ev-78" aria-label="78. dakika, Milan oyuncu değişikliği" title="78' Değişiklik: Musah girdi"><span class="flow-marker__dot"></span></button>
-                        <button type="button" class="flow-marker flow-marker--away flow-marker--sub" style="--m:79" data-flow-ref="ev-79" aria-label="79. dakika, Roma oyuncu değişikliği" title="79' Değişiklik: Belotti girdi"><span class="flow-marker__dot"></span></button>
-                        <button type="button" class="flow-marker flow-marker--home flow-marker--card" style="--m:83" data-flow-ref="ev-83" aria-label="83. dakika, sarı kart, Theo Hernández" title="83' Sarı kart: Theo Hernández"><span class="flow-marker__dot"><span class="i-card i-card--yellow"></span></span></button>
-                        <button type="button" class="flow-marker flow-marker--home flow-marker--sub" style="--m:88" data-flow-ref="ev-88" aria-label="88. dakika, Milan oyuncu değişikliği" title="88' Değişiklik: Okafor girdi"><span class="flow-marker__dot"></span></button>
-                        <button type="button" class="flow-marker flow-marker--away flow-marker--card" style="--m:92" data-flow-ref="ev-90" aria-label="90+2. dakika, kırmızı kart, Diego Llorente" title="90+2' Kırmızı kart: Diego Llorente"><span class="flow-marker__dot"><span class="i-card i-card--red"></span></span></button>
-                    </div>
-                </div>
-            </section>
+            <partial name="_MatchHero" model="Model" />
         </header>
 
         <div class="match-body">
@@ -113,311 +44,67 @@
                 <div class="col-lg-8">
 
                     <!-- Partial: _MatchTimeline -->
-                    <section class="panel" aria-labelledby="timeline-title">
-                        <div class="panel__head">
-                            <h2 class="panel__title" id="timeline-title">Maç olayları</h2>
-                            <div class="event-filter" role="group" aria-label="Olay türüne göre filtrele">
-                                <button type="button" class="chip" data-event-filter="all" aria-pressed="true">Tümü</button>
-                                <button type="button" class="chip" data-event-filter="goal" aria-pressed="false">Goller</button>
-                                <button type="button" class="chip" data-event-filter="card" aria-pressed="false">Kartlar</button>
-                                <button type="button" class="chip" data-event-filter="sub" aria-pressed="false">Değişiklikler</button>
-                            </div>
-                        </div>
+                    <partial name="_MatchTimeline" model="Model" />
 
-                        <div class="timeline-legend" aria-hidden="true">
-                            <span><span class="team-crest team-crest--xs crest-milan">MIL</span>Milan</span>
-                            <span></span>
-                            <span>Roma<span class="team-crest team-crest--xs crest-roma">ROM</span></span>
-                        </div>
-
-                     
-                        <ol class="timeline">
-                            <li class="event event--period"><span class="period-mark">Başlama düdüğü</span></li>
-
-                            <li class="event event--home event--goal" id="ev-14" data-type="goal">
-                                <span class="event__minute">14'</span>
-                                <div class="event-card">
-                                    <span class="event-card__icon"><svg class="i-ball" aria-hidden="true"><use href="#i-ball" /></svg></span>
-                                    <span class="event-card__body"><span class="event-card__player">Rafael Leão</span><span class="event-card__meta">Gol, asist: Theo Hernández</span></span>
-                                    <span class="event-score">1-0</span>
-                                </div>
-                            </li>
-
-                            <li class="event event--away event--yellow" id="ev-27" data-type="card">
-                                <span class="event__minute">27'</span>
-                                <div class="event-card">
-                                    <span class="event-card__icon"><span class="i-card i-card--yellow"></span></span>
-                                    <span class="event-card__body"><span class="event-card__player">Paulo Dybala</span><span class="event-card__meta">Sarı kart, faul</span></span>
-                                </div>
-                            </li>
-
-                            <li class="event event--home event--goal" id="ev-41" data-type="goal">
-                                <span class="event__minute">41'</span>
-                                <div class="event-card">
-                                    <span class="event-card__icon"><svg class="i-ball" aria-hidden="true"><use href="#i-ball" /></svg></span>
-                                    <span class="event-card__body"><span class="event-card__player">Olivier Giroud</span><span class="event-card__meta">Gol, kafa, asist: Rafael Leão</span></span>
-                                    <span class="event-score">2-0</span>
-                                </div>
-                            </li>
-
-                            <li class="event event--period"><span class="period-mark">Devre arası <strong>2-0</strong></span></li>
-
-                            <li class="event event--away event--yellow" id="ev-54" data-type="card">
-                                <span class="event__minute">54'</span>
-                                <div class="event-card">
-                                    <span class="event-card__icon"><span class="i-card i-card--yellow"></span></span>
-                                    <span class="event-card__body"><span class="event-card__player">Bryan Cristante</span><span class="event-card__meta">Sarı kart, taktik faul</span></span>
-                                </div>
-                            </li>
-
-                            <li class="event event--away event--sub" id="ev-58" data-type="sub">
-                                <span class="event__minute">58'</span>
-                                <div class="event-card">
-                                    <span class="event-card__icon"><svg width="18" height="18" aria-hidden="true"><use href="#i-swap" /></svg></span>
-                                    <span class="event-card__body"><span class="event-card__player sub-in">Lorenzo Pellegrini</span><span class="event-card__meta sub-out">Stephan El Shaarawy</span></span>
-                                </div>
-                            </li>
-
-                            <li class="event event--home event--sub" id="ev-64" data-type="sub">
-                                <span class="event__minute">64'</span>
-                                <div class="event-card">
-                                    <span class="event-card__icon"><svg width="18" height="18" aria-hidden="true"><use href="#i-swap" /></svg></span>
-                                    <span class="event-card__body"><span class="event-card__player sub-in">Christian Pulisic</span><span class="event-card__meta sub-out">Samuel Chukwueze</span></span>
-                                </div>
-                            </li>
-
-                            <li class="event event--home event--yellow" id="ev-67" data-type="card">
-                                <span class="event__minute">67'</span>
-                                <div class="event-card">
-                                    <span class="event-card__icon"><span class="i-card i-card--yellow"></span></span>
-                                    <span class="event-card__body"><span class="event-card__player">Fikayo Tomori</span><span class="event-card__meta">Sarı kart, faul</span></span>
-                                </div>
-                            </li>
-
-                            <li class="event event--away event--goal" id="ev-72" data-type="goal">
-                                <span class="event__minute">72'</span>
-                                <div class="event-card">
-                                    <span class="event-card__icon"><svg class="i-ball" aria-hidden="true"><use href="#i-ball" /></svg></span>
-                                    <span class="event-card__body"><span class="event-card__player">Tammy Abraham</span><span class="event-card__meta">Gol, asist: Lorenzo Pellegrini</span></span>
-                                    <span class="event-score">2-1</span>
-                                </div>
-                            </li>
-
-                            <li class="event event--away event--yellow" id="ev-74" data-type="card">
-                                <span class="event__minute">74'</span>
-                                <div class="event-card">
-                                    <span class="event-card__icon"><span class="i-card i-card--yellow"></span></span>
-                                    <span class="event-card__body"><span class="event-card__player">Gianluca Mancini</span><span class="event-card__meta">Sarı kart, itiraz</span></span>
-                                </div>
-                            </li>
-
-                            <li class="event event--home event--sub" id="ev-78" data-type="sub">
-                                <span class="event__minute">78'</span>
-                                <div class="event-card">
-                                    <span class="event-card__icon"><svg width="18" height="18" aria-hidden="true"><use href="#i-swap" /></svg></span>
-                                    <span class="event-card__body"><span class="event-card__player sub-in">Yunus Musah</span><span class="event-card__meta sub-out">Ruben Loftus-Cheek</span></span>
-                                </div>
-                            </li>
-
-                            <li class="event event--away event--sub" id="ev-79" data-type="sub">
-                                <span class="event__minute">79'</span>
-                                <div class="event-card">
-                                    <span class="event-card__icon"><svg width="18" height="18" aria-hidden="true"><use href="#i-swap" /></svg></span>
-                                    <span class="event-card__body"><span class="event-card__player sub-in">Andrea Belotti</span><span class="event-card__meta sub-out">Tammy Abraham</span></span>
-                                </div>
-                            </li>
-
-                            <li class="event event--home event--yellow" id="ev-83" data-type="card">
-                                <span class="event__minute">83'</span>
-                                <div class="event-card">
-                                    <span class="event-card__icon"><span class="i-card i-card--yellow"></span></span>
-                                    <span class="event-card__body"><span class="event-card__player">Theo Hernández</span><span class="event-card__meta">Sarı kart, oyunu geciktirme</span></span>
-                                </div>
-                            </li>
-
-                            <li class="event event--home event--sub" id="ev-88" data-type="sub">
-                                <span class="event__minute">88'</span>
-                                <div class="event-card">
-                                    <span class="event-card__icon"><svg width="18" height="18" aria-hidden="true"><use href="#i-swap" /></svg></span>
-                                    <span class="event-card__body"><span class="event-card__player sub-in">Noah Okafor</span><span class="event-card__meta sub-out">Rafael Leão</span></span>
-                                </div>
-                            </li>
-
-                            <li class="event event--away event--red" id="ev-90" data-type="card">
-                                <span class="event__minute">90+2'</span>
-                                <div class="event-card">
-                                    <span class="event-card__icon"><span class="i-card i-card--red"></span></span>
-                                    <span class="event-card__body"><span class="event-card__player">Diego Llorente</span><span class="event-card__meta">Kırmızı kart, gol şansını engelleme</span></span>
-                                </div>
-                            </li>
-
-                            <li class="event event--period"><span class="period-mark">Maç sonu <strong>2-1</strong></span></li>
-                        </ol>
-                    </section>
-
-                    <!-- Partial: _GoalsPanel + _CardsPanel -->
-                    <section class="panel" aria-labelledby="goals-title">
-                        <div class="panel__head"><h2 class="panel__title" id="goals-title">Goller</h2></div>
-                        <div class="split">
-                            <div class="split__col">
-                                <h3 class="split__team"><span class="team-crest team-crest--xs crest-milan" aria-hidden="true">MIL</span>Milan<span class="split__count">2 gol</span></h3>
-                                <ul class="item-list goal-list">
-                                    <li><span class="item-minute">14'</span><span class="item-main"><strong>Rafael Leão</strong><small>Asist: Theo Hernández</small></span></li>
-                                    <li><span class="item-minute">41'</span><span class="item-main"><strong>Olivier Giroud</strong><small>Asist: Rafael Leão</small></span></li>
-                                </ul>
-                            </div>
-                            <div class="split__col">
-                                <h3 class="split__team"><span class="team-crest team-crest--xs crest-roma" aria-hidden="true">ROM</span>Roma<span class="split__count">1 gol</span></h3>
-                                <ul class="item-list goal-list">
-                                    <li><span class="item-minute">72'</span><span class="item-main"><strong>Tammy Abraham</strong><small>Asist: Lorenzo Pellegrini</small></span></li>
-                                </ul>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section class="panel" aria-labelledby="cards-title">
-                        <div class="panel__head"><h2 class="panel__title" id="cards-title">Kartlar</h2></div>
-                        <div class="split">
-                            <div class="split__col">
-                                <h3 class="split__team"><span class="team-crest team-crest--xs crest-milan" aria-hidden="true">MIL</span>Milan<span class="split__count">2 kart</span></h3>
-                                <ul class="item-list">
-                                    <li><span class="item-minute">67'</span><span class="item-main"><strong>Fikayo Tomori</strong></span><span class="card-tag"><span class="i-card i-card--yellow"></span>Sarı</span></li>
-                                    <li><span class="item-minute">83'</span><span class="item-main"><strong>Theo Hernández</strong></span><span class="card-tag"><span class="i-card i-card--yellow"></span>Sarı</span></li>
-                                </ul>
-                            </div>
-                            <div class="split__col">
-                                <h3 class="split__team"><span class="team-crest team-crest--xs crest-roma" aria-hidden="true">ROM</span>Roma<span class="split__count">4 kart</span></h3>
-                                <ul class="item-list">
-                                    <li><span class="item-minute">27'</span><span class="item-main"><strong>Paulo Dybala</strong></span><span class="card-tag"><span class="i-card i-card--yellow"></span>Sarı</span></li>
-                                    <li><span class="item-minute">54'</span><span class="item-main"><strong>Bryan Cristante</strong></span><span class="card-tag"><span class="i-card i-card--yellow"></span>Sarı</span></li>
-                                    <li><span class="item-minute">74'</span><span class="item-main"><strong>Gianluca Mancini</strong></span><span class="card-tag"><span class="i-card i-card--yellow"></span>Sarı</span></li>
-                                    <li><span class="item-minute">90+2'</span><span class="item-main"><strong>Diego Llorente</strong></span><span class="card-tag"><span class="i-card i-card--red"></span>Kırmızı</span></li>
-                                </ul>
-                            </div>
-                        </div>
-                    </section>
+                    <!-- Partial: _GoalsPanel  -->
+                    <partial name="_GoalsPanel" model="Model" />
+                    <!-- Partial: _CardsPanel -->
+                    <partial name="_CardsPanel" model="Model" />
 
                     <!-- Partial: _SubstitutionsPanel -->
-                    <section class="panel" aria-labelledby="subs-title">
-                        <div class="panel__head"><h2 class="panel__title" id="subs-title">Oyuncu değişiklikleri</h2></div>
-                        <div class="split">
-                            <div class="split__col">
-                                <h3 class="split__team"><span class="team-crest team-crest--xs crest-milan" aria-hidden="true">MIL</span>Milan<span class="split__count">3 değişiklik</span></h3>
-                                <ul class="item-list">
-                                    <li><span class="item-minute">64'</span><span class="item-main"><strong class="sub-in">Christian Pulisic</strong><small class="sub-out">Samuel Chukwueze</small></span></li>
-                                    <li><span class="item-minute">78'</span><span class="item-main"><strong class="sub-in">Yunus Musah</strong><small class="sub-out">Ruben Loftus-Cheek</small></span></li>
-                                    <li><span class="item-minute">88'</span><span class="item-main"><strong class="sub-in">Noah Okafor</strong><small class="sub-out">Rafael Leão</small></span></li>
-                                </ul>
-                            </div>
-                            <div class="split__col">
-                                <h3 class="split__team"><span class="team-crest team-crest--xs crest-roma" aria-hidden="true">ROM</span>Roma<span class="split__count">2 değişiklik</span></h3>
-                                <ul class="item-list">
-                                    <li><span class="item-minute">58'</span><span class="item-main"><strong class="sub-in">Lorenzo Pellegrini</strong><small class="sub-out">Stephan El Shaarawy</small></span></li>
-                                    <li><span class="item-minute">79'</span><span class="item-main"><strong class="sub-in">Andrea Belotti</strong><small class="sub-out">Tammy Abraham</small></span></li>
-                                </ul>
-                            </div>
-                        </div>
-                    </section>
+                    <partial name="_SubstitutionsPanel" model="Model" />
                 </div>
 
                 <!-- ===== Sağ kolon ===== -->
-                <aside class="col-lg-4 side-col" aria-label="Maç özeti ve istatistikler">
+                <aside class="col-lg-4 side-col" aria-label="Match Summary">
 
                     <!-- Partial: _PeriodScoreCards -->
-                    <div class="period-cards">
-                        <article class="period-card">
-                            <p class="period-card__label">İlk yarı</p>
-                            <p class="period-card__score">2-0</p>
-                            <p class="period-card__note">Milan önde</p>
-                        </article>
-                        <article class="period-card">
-                            <p class="period-card__label">İkinci yarı</p>
-                            <p class="period-card__score">0-1</p>
-                            <p class="period-card__note">Roma önde</p>
-                        </article>
-                        <article class="period-card period-card--final">
-                            <p class="period-card__label">Sonuç</p>
-                            <p class="period-card__score">2-1</p>
-                            <p class="period-card__note">Milan kazandı</p>
-                        </article>
-                    </div>
+                    <partial name="_PeriodScoreCards" model="Model" />
 
                     <!-- Partial: _MatchStats -->
-                    <section class="panel" aria-labelledby="stats-title">
-                        <div class="panel__head">
-                            <h2 class="panel__title" id="stats-title">İstatistikler</h2>
-                            <div class="stats-teams" aria-hidden="true">
-                                <span><span class="team-crest team-crest--xs crest-milan">MIL</span>Milan</span>
-                                <span>Roma<span class="team-crest team-crest--xs crest-roma">ROM</span></span>
+                    @if (Model.HasEvents)
+                    {
+                        <section class="panel" aria-labelledby="stats-title">
+                            <div class="panel__head">
+                                <h2 class="panel__title" id="stats-title">Match summary</h2>
+                                <div class="stats-teams" aria-hidden="true">
+                                    <span><span class="team-crest team-crest--xs" style="--crest-a:@homeBadge.Primary;--crest-b:@homeBadge.Secondary"></span>@match.HomeTeamName</span>
+                                    <span>@match.AwayTeamName<span class="team-crest team-crest--xs" style="--crest-a:@awayBadge.Primary;--crest-b:@awayBadge.Secondary"></span></span>
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="possession">
-                            <div class="possession__row">
-                                <span class="possession__value">%54</span>
-                                <span class="possession__label">Topa sahip olma</span>
-                                <span class="possession__value possession__value--away">%46</span>
-                            </div>
-                            <div class="possession__bar" aria-hidden="true">
-                                <span style="flex:54;background:var(--home)"></span>
-                                <span style="flex:46;background:var(--away)"></span>
-                            </div>
-                        </div>
-
-                        <!-- Razor: her satır için --w = değer / (ev + dep) -->
-                        <ul class="stat-list">
-                            <li class="stat-row">
-                                <div class="stat-row__values"><span class="stat-val is-lead">15</span><span class="stat-row__label">Şut</span><span class="stat-val stat-val--away">10</span></div>
-                                <div class="stat-bar" aria-hidden="true"><span class="bar-home" style="--w:calc(60% - 2px)"></span><span class="bar-away" style="--w:calc(40% - 2px)"></span></div>
-                            </li>
-                            <li class="stat-row">
-                                <div class="stat-row__values"><span class="stat-val is-lead">7</span><span class="stat-row__label">İsabetli şut</span><span class="stat-val stat-val--away">4</span></div>
-                                <div class="stat-bar" aria-hidden="true"><span class="bar-home" style="--w:calc(63.6% - 2px)"></span><span class="bar-away" style="--w:calc(36.4% - 2px)"></span></div>
-                            </li>
-                            <li class="stat-row">
-                                <div class="stat-row__values"><span class="stat-val is-lead">512</span><span class="stat-row__label">Pas</span><span class="stat-val stat-val--away">438</span></div>
-                                <div class="stat-bar" aria-hidden="true"><span class="bar-home" style="--w:calc(53.9% - 2px)"></span><span class="bar-away" style="--w:calc(46.1% - 2px)"></span></div>
-                            </li>
-                            <li class="stat-row">
-                                <div class="stat-row__values"><span class="stat-val is-lead">%87</span><span class="stat-row__label">Pas isabeti</span><span class="stat-val stat-val--away">%82</span></div>
-                                <div class="stat-bar" aria-hidden="true"><span class="bar-home" style="--w:calc(51.5% - 2px)"></span><span class="bar-away" style="--w:calc(48.5% - 2px)"></span></div>
-                            </li>
-                            <li class="stat-row">
-                                <div class="stat-row__values"><span class="stat-val is-lead">6</span><span class="stat-row__label">Korner</span><span class="stat-val stat-val--away">4</span></div>
-                                <div class="stat-bar" aria-hidden="true"><span class="bar-home" style="--w:calc(60% - 2px)"></span><span class="bar-away" style="--w:calc(40% - 2px)"></span></div>
-                            </li>
-                            <li class="stat-row stat-row--muted">
-                                <div class="stat-row__values"><span class="stat-val">11</span><span class="stat-row__label">Faul</span><span class="stat-val stat-val--away is-lead">13</span></div>
-                                <div class="stat-bar" aria-hidden="true"><span class="bar-home" style="--w:calc(45.8% - 2px)"></span><span class="bar-away" style="--w:calc(54.2% - 2px)"></span></div>
-                            </li>
-                            <li class="stat-row stat-row--muted">
-                                <div class="stat-row__values"><span class="stat-val is-lead">2</span><span class="stat-row__label">Ofsayt</span><span class="stat-val stat-val--away">1</span></div>
-                                <div class="stat-bar" aria-hidden="true"><span class="bar-home" style="--w:calc(66.7% - 2px)"></span><span class="bar-away" style="--w:calc(33.3% - 2px)"></span></div>
-                            </li>
-                            <li class="stat-row stat-row--muted">
-                                <div class="stat-row__values"><span class="stat-val">2</span><span class="stat-row__label">Sarı kart</span><span class="stat-val stat-val--away is-lead">3</span></div>
-                                <div class="stat-bar" aria-hidden="true"><span class="bar-home" style="--w:calc(40% - 2px)"></span><span class="bar-away" style="--w:calc(60% - 2px)"></span></div>
-                            </li>
-                            <li class="stat-row stat-row--muted">
-                                <div class="stat-row__values"><span class="stat-val">0</span><span class="stat-row__label">Kırmızı kart</span><span class="stat-val stat-val--away is-lead">1</span></div>
-                                <div class="stat-bar" aria-hidden="true"><span class="bar-home" style="--w:0%"></span><span class="bar-away" style="--w:100%"></span></div>
-                            </li>
-                        </ul>
-                    </section>
+                            <ul class="stat-list">
+                                @foreach (var r in rows)
+                                {
+                                    int total = r.Home + r.Away;
+                                    int homePct = total == 0 ? 50 : r.Home * 100 / total;
+                                    <li class="stat-row">
+                                        <div class="stat-row__values">
+                                            <span class="stat-val @(r.Home > r.Away ? "is-lead" : "")">@r.Home</span>
+                                            <span class="stat-row__label">@r.Label</span>
+                                            <span class="stat-val stat-val--away @(r.Away > r.Home ? "is-lead" : "")">@r.Away</span>
+                                        </div>
+                                        <div class="stat-bar" aria-hidden="true">
+                                            <span class="bar-home" style="--w:calc(@(homePct)% - 2px)"></span>
+                                            <span class="bar-away" style="--w:calc(@(100 - homePct)% - 2px)"></span>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </section>
+                    }
 
                     <!-- Partial: _MatchInfoCard -->
                     <section class="panel" aria-labelledby="info-title">
-                        <div class="panel__head"><h2 class="panel__title" id="info-title">Maç bilgileri</h2></div>
+                        <div class="panel__head"><h2 class="panel__title" id="info-title">Match info</h2></div>
                         <dl class="info-list">
-                            <div><dt>Lig</dt><dd>Serie A</dd></div>
-                            <div><dt>Sezon</dt><dd>2026/27</dd></div>
-                            <div><dt>Hafta</dt><dd>12</dd></div>
-                            <div><dt>Stadyum</dt><dd>San Siro</dd></div>
-                            <div><dt>Şehir</dt><dd>Milano, İtalya</dd></div>
-                            <div><dt>Hakem</dt><dd>Daniele Orsato</dd></div>
-                            <div><dt>Seyirci</dt><dd>72.145</dd></div>
-                            <div><dt>Tarih</dt><dd>18 Kasım 2026</dd></div>
-                            <div><dt>Saat</dt><dd>22:45</dd></div>
+                            <div><dt>League</dt><dd>Serie A</dd></div>
+                            <div><dt>Season</dt><dd>2026/27</dd></div>
+                            <div><dt>Matchweek</dt><dd>@match.Week</dd></div>
+                            <div><dt>Stadium</dt><dd>@match.Stadium</dd></div>
+                            <div><dt>Date</dt><dd>@match.MatchDate.ToString("d MMMM yyyy", en)</dd></div>
+                            <div><dt>Kick-off</dt><dd>@match.MatchDate.ToString("HH:mm")</dd></div>
+                            <div><dt>Status</dt><dd>@match.Status.ToDisplayName()</dd></div>
                         </dl>
                     </section>
                 </aside>
@@ -428,45 +115,26 @@
     </main>
 
     <script>
-        /* Maç Detay - match-detail.js
-           Olay filtresi + maç akışı şeridi <-> zaman çizelgesi eşlemesi. */
-        (function () {
-          'use strict';
+        (() => {
+            const chips = document.querySelectorAll('[data-event-filter]');
+            const items = document.querySelectorAll('.timeline [data-type]');
 
-          const root = document.querySelector('[data-match]');
-          if (!root) return;
+            chips.forEach(chip => chip.addEventListener('click', () => {
+                const f = chip.dataset.eventFilter;
+                chips.forEach(c => c.setAttribute('aria-pressed', String(c === chip)));
+                items.forEach(li => { li.hidden = f !== 'all' && li.dataset.type !== f; });
+            }));
 
-          const chips = Array.from(root.querySelectorAll('[data-event-filter]'));
-          const events = Array.from(root.querySelectorAll('.event[data-type]'));
-          const markers = Array.from(root.querySelectorAll('[data-flow-ref]'));
-          const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-          function setFilter(type) {
-            chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.eventFilter === type)));
-            events.forEach((ev) => { ev.hidden = type !== 'all' && ev.dataset.type !== type; });
-          }
-          chips.forEach((chip) => chip.addEventListener('click', () => setFilter(chip.dataset.eventFilter)));
-
-          markers.forEach((marker) => {
-            const target = document.getElementById(marker.dataset.flowRef);
-            if (!target) return;
-
-            marker.addEventListener('click', () => {
-              if (target.hidden) setFilter('all');
-              target.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' });
-              target.classList.remove('is-flash');
-              void target.offsetWidth;
-              target.classList.add('is-flash');
-              setTimeout(() => target.classList.remove('is-flash'), 1600);
-            });
-
-            const on = () => { target.classList.add('is-hover'); marker.classList.add('is-hover'); };
-            const off = () => { target.classList.remove('is-hover'); marker.classList.remove('is-hover'); };
-            marker.addEventListener('mouseenter', on);
-            marker.addEventListener('mouseleave', off);
-            target.addEventListener('mouseenter', on);
-            target.addEventListener('mouseleave', off);
-          });
+            // Şeritteki işarete tıklayınca listedeki olaya git ve vurgula
+            document.querySelectorAll('[data-flow-ref]').forEach(marker =>
+                marker.addEventListener('click', () => {
+                    const target = document.getElementById(marker.dataset.flowRef);
+                    if (!target) return;
+                    if (target.hidden) document.querySelector('[data-event-filter="all"]')?.click();
+                    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    target.classList.add('is-active');
+                    setTimeout(() => target.classList.remove('is-active'), 1600);
+                }));
         })();
     </script>
 </body>

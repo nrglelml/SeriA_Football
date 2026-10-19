@@ -15,9 +15,9 @@ namespace SeriA_Football.WebUI.Models
 
         public string Category => Type switch
         {
-            MatchEventType.Goal => "goals",
-            MatchEventType.Substitution => "subs",
-            _ => "cards"
+            MatchEventType.Goal => "goal",
+            MatchEventType.Substitution => "sub",
+            _ => "card"
         };
 
      
@@ -32,5 +32,16 @@ namespace SeriA_Football.WebUI.Models
         };
 
         public bool IsFirstHalf => Minute <= 45;
+        public string Key { get; set; } = "";
+        public string TypeCss => Type switch
+        {
+            MatchEventType.Goal => "goal",
+            MatchEventType.YellowCard => "yellow",
+            MatchEventType.SecondYellow => "second-yellow",
+            MatchEventType.RedCard => "red",
+            MatchEventType.Substitution => "sub",
+            _ => ""
+        };
+
     }
 }

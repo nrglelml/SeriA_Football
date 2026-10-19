@@ -1,0 +1,85 @@
+﻿@model MatchDetailPageViewModel
+@{
+    var match = Model.Match;
+    var events = Model.Events;
+    var homeBadge = TeamHelper.Get(match.HomeTeamName);
+    var awayBadge = TeamHelper.Get(match.AwayTeamName);
+
+    var homeCards = events.Where(e => e.IsHome && e.Category == "card").ToList();
+    var awayCards = events.Where(e => !e.IsHome && e.Category == "card").ToList();
+
+}
+
+<section class="panel" aria-labelledby="cards-title">
+    <div class="panel__head"><h2 class="panel__title" id="cards-title">Cards</h2></div>
+    <div class="split">
+        <div class="split__col">
+            <h3 class="split__team">
+                <span class="team-crest team-crest--xs" style="--crest-a:@homeBadge.Primary;--crest-b:@homeBadge.Secondary"></span>
+                @match.HomeTeamName
+                <span class="split__count">@homeCards.Count</span>
+            </h3>
+
+            @if (homeCards.Count > 0)
+            {
+                <ul class="item-list">
+                    @foreach (var e in homeCards)
+                    {
+                        bool isRed = e.Type != MatchEventType.YellowCard;
+                        <li>
+                            <span class="item-minute">@(e.Minute)'</span>
+                            <span class="item-main"><strong>@e.PlayerName</strong></span>
+                            <span class="card-tag">
+                                <span class="i-card @(isRed ? "i-card--red" : "i-card--yellow")"></span>
+                                @(e.Type switch
+                                {
+                                    MatchEventType.SecondYellow => "2nd yellow",
+                                    MatchEventType.RedCard => "Red",
+                                    _ => "Yellow"
+                                })
+                    </span>
+                </li>
+                                }
+                </ul>
+            }
+            else
+            {
+                <p class="item-empty">No cards</p>
+            }
+        </div>
+        <div class="split__col">
+            <h3 class="split__team">
+                <span class="team-crest team-crest--xs" style="--crest-a:@awayBadge.Primary;--crest-b:@awayBadge.Secondary"></span>
+                @match.AwayTeamName
+                <span class="split__count">@awayCards.Count</span>
+            </h3>
+
+            @if (awayCards.Count > 0)
+            {
+                <ul class="item-list">
+                    @foreach (var e in awayCards)
+                    {
+                        bool isRed = e.Type != MatchEventType.YellowCard;
+                        <li>
+                            <span class="item-minute">@(e.Minute)'</span>
+                            <span class="item-main"><strong>@e.PlayerName</strong></span>
+                            <span class="card-tag">
+                                <span class="i-card @(isRed ? "i-card--red" : "i-card--yellow")"></span>
+                                @(e.Type switch
+                                {
+                                    MatchEventType.SecondYellow => "2nd yellow",
+                                    MatchEventType.RedCard => "Red",
+                                    _ => "Yellow"
+                                })
+                    </span>
+                </li>
+                                }
+                </ul>
+            }
+            else
+            {
+                <p class="item-empty">No cards</p>
+            }
+        </div>
+    </div>
+</section>

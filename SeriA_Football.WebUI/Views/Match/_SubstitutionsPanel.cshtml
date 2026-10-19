@@ -1,0 +1,58 @@
+﻿@model MatchDetailPageViewModel
+@{
+    var match = Model.Match;
+    var events = Model.Events;
+    var homeBadge = TeamHelper.Get(match.HomeTeamName);
+    var awayBadge = TeamHelper.Get(match.AwayTeamName);
+
+    var homeSub = events.Where(e => e.IsHome && e.Category == "sub").ToList();
+    var awaySub = events.Where(e => !e.IsHome && e.Category == "sub").ToList();
+}
+<section class="panel" aria-labelledby="subs-title">
+    <div class="panel__head"><h2 class="panel__title" id="subs-title">Substitutions</h2></div>
+    <div class="split">
+        <div class="split__col">
+            <h3 class="split__team">
+                <span class="team-crest team-crest--xs" style="--crest-a:@homeBadge.Primary;--crest-b:@homeBadge.Secondary"></span>
+                @match.HomeTeamName
+                <span class="split__count">@homeSub.Count</span>
+            </h3>
+            @if (homeSub.Count > 0)
+            {
+
+                <ul class="item-list">
+                    @foreach (var e in homeSub)
+                    {
+                        <li><span class="item-minute">@e.Minute'</span><span class="item-main"><strong class="sub-in">@e.PlayerName</strong><small class="sub-out">@e.PlayerOut</small></span></li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p class="item-empty">No subs</p>
+            }
+
+        </div>
+        <div class="split__col">
+            <h3 class="split__team">
+                <span class="team-crest team-crest--xs" style="--crest-a:@awayBadge.Primary;--crest-b:@awayBadge.Secondary"></span>
+                @match.HomeTeamName
+                <span class="split__count">@awaySub.Count</span>
+            </h3>
+            @if (awaySub.Count > 0)
+            {
+
+                <ul class="item-list">
+                    @foreach (var e in awaySub)
+                    {
+                        <li><span class="item-minute">@e.Minute'</span><span class="item-main"><strong class="sub-in">@e.PlayerName</strong><small class="sub-out">@e.PlayerOut</small></span></li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p class="item-empty">No subs</p>
+            }
+        </div>
+    </div>
+</section>

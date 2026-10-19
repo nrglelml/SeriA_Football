@@ -14,7 +14,7 @@ namespace SeriA_Football.WebUI.Helpers
         };
 
      
-        public static string ToCss(this MatchStatusUI status) => status switch
+        public static string ToCss(this MatchStatusUI status) => status switch //css sınıfları için enumdaki isimlerin karşılığı
         {
             MatchStatusUI.Scheduled => "NotStarted",
             MatchStatusUI.Live => "Live",

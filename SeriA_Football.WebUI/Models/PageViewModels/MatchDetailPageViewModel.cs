@@ -63,7 +63,10 @@ public class MatchDetailPageViewModel
                 });
             }
 
-            return list.OrderBy(e => e.Minute).ThenBy(e => e.Type).ToList(); //önce dakikaya sonra tipe göre sıralama
+            var ordered = list.OrderBy(e => e.Minute).ThenBy(e => e.Type).ToList(); //önce dakikaya sonra tipe göre sıralama
+            for (int i = 0; i < ordered.Count; i++)
+                ordered[i].Key = $"ev-{i}";
+            return ordered; 
         }
     }
     //ilk yarı ve ikinci yarı goller

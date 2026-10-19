@@ -1,0 +1,114 @@
+﻿@model MatchDetailPageViewModel
+@{
+
+    var match = Model.Match;
+    var events = Model.Events;
+    var homeBadge = TeamHelper.Get(match.HomeTeamName);
+    var awayBadge = TeamHelper.Get(match.AwayTeamName);
+
+    bool finished = match.Status == MatchStatusUI.Completed;
+
+}
+<section class="panel" aria-labelledby="timeline-title">
+    <div class="panel__head">
+        <h2 class="panel__title" id="timeline-title">Match events</h2>
+        @if (events.Count > 0)
+        {
+            <div class="event-filter" role="group" aria-label="Filter by event type">
+                <button type="button" class="chip" data-event-filter="all" aria-pressed="true">All</button>
+                <button type="button" class="chip" data-event-filter="goal" aria-pressed="false">Goals</button>
+                <button type="button" class="chip" data-event-filter="card" aria-pressed="false">Cards</button>
+                <button type="button" class="chip" data-event-filter="sub" aria-pressed="false">Substitutions</button>
+            </div>
+        }
+    </div>
+
+    @if (events.Count == 0)
+    {
+        <p class="empty-state">No events recorded for this match.</p>
+    }
+    else
+    {
+        <div class="timeline-legend" aria-hidden="true">
+            <span class="flow-side-label flow-side-label--home">
+                <span class="team-crest team-crest--xs" style="--crest-a:@homeBadge.Primary;--crest-b:@homeBadge.Secondary"></span>
+            </span>
+            <span class="flow-side-label flow-side-label--away">
+                <span class="team-crest team-crest--xs" style="--crest-a:@awayBadge.Primary;--crest-b:@awayBadge.Secondary"></span>
+            </span>
+        </div>
+
+        <ol class="timeline">
+            <li class="event event--period"><span class="period-mark">Kick-off</span></li>
+
+            @{
+                bool halfTimeShown = false;
+            }
+            @foreach (var e in events)
+            {
+                //devre arası
+                if (!halfTimeShown && !e.IsFirstHalf)
+                {
+                    halfTimeShown = true;
+                    <li class="event event--period"><span class="period-mark">Half-time <strong>@Model.HalfTimeHome-@Model.HalfTimeAway</strong></span></li>
+                }
+
+                <li class="event event--@(e.IsHome ? "home" : "away") event--@e.Category"
+                    id="@e.Key" data-type="@e.Category">
+                    <span class="event__minute">@(e.Minute)'</span>
+                    <div class="event-card">
+
+                        <span class="event-card__icon">
+                            @switch (e.Type)
+                            {
+                                case MatchEventType.Goal:
+                                    <svg class="i-ball" aria-hidden="true"><use href="#i-ball" /></svg>
+                                    break;
+                                case MatchEventType.YellowCard:
+                                    <span class="i-card i-card--yellow"></span>
+                                    break;
+                                case MatchEventType.SecondYellow:
+                                case MatchEventType.RedCard:
+                                    <span class="i-card i-card--red"></span>
+                                    break;
+                                case MatchEventType.Substitution:
+                                    <svg width="18" height="18" aria-hidden="true"><use href="#i-swap" /></svg>
+                                    break;
+                            }
+                        </span>
+
+                        @if (e.Type == MatchEventType.Substitution)
+                        {
+                            <span class="event-card__body">
+                                <span class="event-card__player sub-in">@e.PlayerName</span>
+                                <span class="event-card__meta sub-out">@e.PlayerOut</span>
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="event-card__body">
+                                <span class="event-card__player">@e.PlayerName</span>
+                                <span class="event-card__meta">@e.Label</span>
+                            </span>
+                        }
+
+                        @if (e.ScoreAfter != null)
+                        {
+                            <span class="event-score">@e.ScoreAfter</span>
+                        }
+                    </div>
+                </li>
+            }
+
+            @if (finished)
+            {
+                @* Bütün olaylar ilk yarıdaysa ayraç döngüde çizilmedi *@
+                @if (!halfTimeShown)
+                {
+                    <li class="event event--period"><span class="period-mark">Half-time <strong>@Model.HalfTimeHome-@Model.HalfTimeAway</strong></span></li>
+                }
+                <li class="event event--period"><span class="period-mark">Full time <strong>@match.HomeScore-@match.AwayScore</strong></span></li>
+            }
+        </ol>
+    }
+</section>

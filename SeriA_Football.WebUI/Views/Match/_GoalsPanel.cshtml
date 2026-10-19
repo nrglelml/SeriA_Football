@@ -1,0 +1,45 @@
+﻿@model MatchDetailPageViewModel
+@{
+    var match = Model.Match;
+
+    var homeBadge = TeamHelper.Get(match.HomeTeamName);
+    var awayBadge = TeamHelper.Get(match.AwayTeamName);
+}
+<section class="panel" aria-labelledby="goals-title">
+    <div class="panel__head"><h2 class="panel__title" id="goals-title">Goals</h2></div>
+    <div class="split">
+        <div class="split__col">
+
+            <h3 class="split__team"><span class="team-crest team-crest--xs" style="--crest-a:@homeBadge.Primary;--crest-b:@homeBadge.Secondary"></span>@match.HomeTeamName<span class="split__count">@(match.HomeScore ?? 0)</span></h3>
+            @if (Model.HomeScorers.Count > 0)
+            {
+                <ul class="item-list goal-list">
+                    @foreach (var goal in Model.HomeScorers)
+                    {
+                        <li><span class="item-minute">@goal.Minute'</span><span class="item-main"><strong>@goal.PlayerName</strong></span></li>
+
+                    }
+
+                </ul>
+
+            }
+
+        </div>
+        <div class="split__col">
+            <h3 class="split__team"><span class="team-crest team-crest--xs" style="--crest-a:@awayBadge.Primary;--crest-b:@awayBadge.Secondary"></span>@match.AwayTeamName<span class="split__count">@(match.AwayScore ?? 0)</span></h3>
+            @if (Model.AwayScorers.Count > 0)
+            {
+                <ul class="item-list goal-list">
+                    @foreach (var goal in Model.AwayScorers)
+                    {
+                        <li><span class="item-minute">@goal.Minute'</span><span class="item-main"><strong>@goal.PlayerName</strong></span></li>
+
+                    }
+
+                </ul>
+
+            }
+
+        </div>
+    </div>
+</section>
