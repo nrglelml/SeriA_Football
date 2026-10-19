@@ -1,0 +1,141 @@
+﻿@model List<TeamViewModel>
+@{
+    ViewData["Title"] = "Takım Yönetimi";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+ 
+    int cityCount = Model.Select(t => t.City).Distinct().Count();
+    int stadiumCount = Model.Select(t => t.Stadium).Distinct().Count();
+    int sharedCount = Model.GroupBy(t => t.Stadium).Where(g => g.Count() > 1).Sum(g => g.Count());
+}
+
+<main class="admin-content">
+    <div class="page-head">
+        <div>
+            <span class="page-eyebrow">Serie A 2026/27</span>
+            <h1 class="page-title">Takım Yönetimi</h1>
+            <p class="page-desc">Ligdeki kulüpleri, şehirlerini ve stadyumlarını görüntüleyebilirsiniz.</p>
+        </div>
+    </div>
+
+    @if (TempData["Error"] is string err)
+    {
+        <div class="form-alert is-visible" role="alert">@err</div>
+    }
+
+   
+    <section class="league-strip" aria-label="Lig özeti">
+        <div class="strip-item strip-item--green">
+            <span class="strip-icon"><svg class="icon" aria-hidden="true"><use href="#i-shield" /></svg></span>
+            <div><span class="strip-label">Takım</span><span class="strip-value">@Model.Count <small>/ 20</small></span></div>
+        </div>
+        <div class="strip-item strip-item--blue">
+            <span class="strip-icon"><svg class="icon" aria-hidden="true"><use href="#i-pin" /></svg></span>
+            <div><span class="strip-label">Temsil edilen şehir</span><span class="strip-value">@cityCount</span></div>
+        </div>
+        <div class="strip-item strip-item--navy">
+            <span class="strip-icon"><svg class="icon" aria-hidden="true"><use href="#i-stadium" /></svg></span>
+            <div><span class="strip-label">Farklı stadyum</span><span class="strip-value">@stadiumCount</span></div>
+        </div>
+        <div class="strip-item strip-item--red">
+            <span class="strip-icon"><svg class="icon" aria-hidden="true"><use href="#i-clock" /></svg></span>
+            <div><span class="strip-label">Stadyum paylaşan takım</span><span class="strip-value">@sharedCount</span></div>
+        </div>
+    </section>
+
+    <section class="card-a" aria-label="Takım listesi">
+  
+        <form class="filter-bar" data-filter-form role="search">
+            <div class="filter-search">
+                <label class="field-label" for="f-q">Takım Ara</label>
+                <div class="input-icon">
+                    <svg class="icon" aria-hidden="true"><use href="#i-search" /></svg>
+                    <input class="input-a" id="f-q" type="search" placeholder="Takım, şehir veya stadyum" autocomplete="off" data-team-search>
+                </div>
+            </div>
+            <div class="filter-actions">
+                <button type="reset" class="btn-a btn-a--ghost">Temizle</button>
+            </div>
+        </form>
+
+        <div class="table-scroll">
+            <table class="team-table">
+                <caption class="visually-hidden">Serie A takım listesi</caption>
+                <thead>
+                    <tr>
+                        <th scope="col" class="col-id">ID</th>
+                        <th scope="col">Takım</th>
+                        <th scope="col">Şehir</th>
+                        <th scope="col">Stadyum</th>
+                        <th scope="col">Renkler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var team in Model)
+                    {
+                        var badge = TeamHelper.Get(team.Name);
+                        <tr data-team-row data-search="@($"{team.Name} {team.City} {team.Stadium} {badge.Code}")">
+                            <td class="col-id">@team.Id</td>
+                            <td>
+                                <div class="team-cell">
+                                    <partial name="_TeamBadge" model="team.Name" />
+                                    <div>
+                                        <span class="team-name">@team.Name</span>
+                                        <span class="team-code">@badge.Code</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="city-cell">@team.City</td>
+                            <td>@team.Stadium</td>
+                            <td>
+                                <span class="swatches" title="@badge.Primary / @badge.Secondary">
+                                    <span class="swatch" style="--c:@badge.Primary"></span>
+                                    <span class="swatch" style="--c:@badge.Secondary"></span>
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                    <tr class="table-empty" data-empty-row hidden>
+                        <td colspan="5"><strong>Takım bulunamadı</strong>Farklı bir arama deneyin ya da Temizle'ye basın.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-foot">
+            <span><strong data-visible-count>@Model.Count</strong> / @Model.Count takım gösteriliyor</span>
+            <span>Serie A'da 20 takım yer alır</span>
+        </div>
+    </section>
+</main>
+
+
+    <script>
+        (function () {
+            'use strict';
+            const input = document.querySelector('[data-team-search]');
+            const form = document.querySelector('[data-filter-form]');
+            const rows = Array.from(document.querySelectorAll('[data-team-row]'));
+            const counter = document.querySelector('[data-visible-count]');
+            const emptyRow = document.querySelector('[data-empty-row]');
+
+            // 'en' bilerek: Türkçe küçültmede "I" -> "ı" olur ve "inter" aramasında Inter bulunmaz
+            const norm = (s) => (s || '').toLocaleLowerCase('en').normalize('NFD').replace(/[̀-ͯ]/g, '');
+
+            function apply() {
+                const q = norm(input.value.trim());
+                let visible = 0;
+                rows.forEach((row) => {
+                    row.hidden = q !== '' && !norm(row.dataset.search).includes(q);
+                    if (!row.hidden) visible++;
+                });
+                counter.textContent = visible;
+                emptyRow.hidden = visible !== 0;
+            }
+
+            input.addEventListener('input', apply);
+            form.addEventListener('submit', (e) => { e.preventDefault(); apply(); });
+            form.addEventListener('reset', () => setTimeout(apply));   // reset değeri temizledikten sonra çalışsın
+        })();
+    </script>
+
