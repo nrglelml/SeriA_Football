@@ -22,6 +22,38 @@ namespace SeriA_Football.API.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("SeriA_Football.API.Entities.AdminUser", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Username")
+                        .IsUnique();
+
+                    b.ToTable("AdminUsers");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            PasswordHash = "100000.UNyrBUa/wMZkmBPJyD6DqQ==.65rb0slZxShkLLgnJjeUnqhuT9e7caA357VRtYjFfbg=",
+                            Username = "admin"
+                        });
+                });
+
             modelBuilder.Entity("SeriA_Football.API.Entities.Match", b =>
                 {
                     b.Property<int>("Id")

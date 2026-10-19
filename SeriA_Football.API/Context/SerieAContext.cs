@@ -14,9 +14,23 @@ public class SerieAContext : DbContext
     public DbSet<MatchGoal> MatchGoals => Set<MatchGoal>();
     public DbSet<MatchCard> MatchCards => Set<MatchCard>();
     public DbSet<Substitution> Substitutions => Set<Substitution>();
+    public DbSet<AdminUser> AdminUsers => Set<AdminUser>();
 
     protected override void OnModelCreating(ModelBuilder mb)
     {
+        //admin username unique olsun, yoksa aynı kullanıcı adıyla birden fazla admin oluşturulabilir.
+        mb.Entity<AdminUser>().HasIndex(u => u.Username).IsUnique();
+
+        mb.Entity<AdminUser>().HasData(new AdminUser
+        {
+            Id = 1,
+            Username = "admin",
+            // Şifre: Admin123!
+            // Hash SABİT yazılıyor: PasswordHelper.Hash() her çağrıda yeni salt üretir,
+            // seed'de çağrılırsa her migration'da veri "değişmiş" görünür.
+            PasswordHash = "100000.UNyrBUa/wMZkmBPJyD6DqQ==.65rb0slZxShkLLgnJjeUnqhuT9e7caA357VRtYjFfbg="
+        });
+
         // Match -> Team iki kez bağlı. SQL Server "multiple cascade paths"
         // hatası vermesin diye Restrict kullanılıyor.
         mb.Entity<Match>()
