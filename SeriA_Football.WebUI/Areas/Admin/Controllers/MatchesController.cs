@@ -5,8 +5,9 @@ namespace SeriA_Football.WebUI.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize]
-    public class AdminController : Controller
+    public class MatchesController : Controller
     {
+
         public IActionResult Index()
         {
             return View();
